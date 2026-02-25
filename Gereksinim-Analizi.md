@@ -4,4 +4,4 @@
 
 
 # Gereksinim Dağılımları
-1. Merve Varlıbaşın gereksinimleri   (Merve-Varlıbaş/Merve-Varlıbaş-Gereksinimler.md)
+1. [Merve Varlıbaşın gereksinimleri](Merve-Varlıbaş/Merve-Varlıbaş-Gereksinimler.md)
