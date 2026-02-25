@@ -11,7 +11,7 @@ Geleneksel ders çalışma rutinini dinamik ve sosyal bir dijital deneyime dön�
 Eğitim
 
 **Referans Uygulama:** 
-https://www.tusdata.com/
+https://www.tusbuddy.com/
 
 ## Proje Linkleri
 
