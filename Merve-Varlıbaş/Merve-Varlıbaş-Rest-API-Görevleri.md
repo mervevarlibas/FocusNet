@@ -38,23 +38,39 @@
 ## 4. Çalışma Serisi
 - **Endpoint:** `GET /api/progress/streak`
 - **Authentication:** Bearer Token gerekli
-- **Response:** `200 OK` -Streak bilgisi getirildi
+- **Response:** `200 OK` -Mevcut ve en uzun çalışma serisi bilgisi getirildi
+- **Request Body:**
+    ```json
+  {
+ "currentStreakDays": 5,
+  "longestStreakDays": 14
+  }
+  ```
 
 ## 5. Hedef Değiştirme
 - **Endpoint:** `UPDATE /api/goals/daily/{dailyGoalId}`
 - **Path Parameters:**
- `dailyGoalId`(string, required) - Güncellenecek hedefin kimliği.
+ `dailyGoalId`(string, required) - Güncellenecek hedefin ID.
 - **Authentication:** Bearer Token gerekli
 - **Response:** `200 OK` -Günlük hedef güncellendi
+- **Request Body:**
+    ```json
+  {
+  "targetMinutes": 150
+  }
+  ```
 
 ## 6. Pomodoro Zamanlayıcı
-- **Endpoint:** `POST  /api/pomodoro/start`
-- **Response:** `201` -Pomodoro başlatıldı
-
 - **Endpoint:** `POST  /api/pomodoro/stop`
 - **Response:** `200` -Pomodoro durduruldu
-
+- **Request Body:**
+    ```json
+  {
+   "pomodoroRunId": "pr_123"
+  }
+  ```
 - **Authentication:** Bearer Token gerekli
+- **Response:** `200 OK` -Pomodoro oturumu başarıyla durduruldu.
 
 ## 7. Ekran Teması
 - **Endpoint:** `PUT  /api/users/theme`
@@ -69,7 +85,7 @@
 
 ## 8. Süre Durdurma
 - **Endpoint:** `POST /api/timers/stop`
-- **Response:** `200` -Süre durduruldu
+- **Response:** `200 OK` -Süre durduruldu ve kaydedildi
 - **Authentication:** Bearer Token gerekli
 - **Request Body:** 
   ```json
