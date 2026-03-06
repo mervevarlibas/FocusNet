@@ -1,0 +1,1056 @@
+openapi: 3.0.3
+info:
+  title: Ders Çalışma Uygulaması API'si
+  version: 1.0.0
+  description: >
+    Bu API; kullanıcı girişi, arkadaş ekleme/silme, liderlik tablosu, takvim,
+    süre başlatma/durdurma, şifre yenileme, günlük hedef oluşturma,
+    hedef değiştirme/silme, avatar ekleme, pomodoro zamanlayıcı (25/5 sabit),
+    ekran teması, yüzde tamamlama sistemi ve çalışma serisi (streak) özelliklerini
+    sağlayan RESTful bir servistir. API, JWT tabanlı kimlik doğrulama ile korunmaktadır.
+  contact:
+    name: Merve Varlıbaş, Dilan Alma
+
+servers:
+  - url: https://api.example.com
+    description: Üretim sunucusu (Production)
+  - url: https://staging-api.example.com
+    description: Test sunucusu (Staging)
+  - url: http://localhost:3000
+    description: Yerel geliştirme sunucusu (Development)
+
+tags:
+  - name: Auth
+    description: Kullanıcı girişi ve şifre yenileme
+  - name: Friends
+    description: Arkadaş ekleme, listeleme ve silme işlemleri
+  - name: Leaderboard
+    description: Liderlik tablosu görüntüleme
+  - name: Calendar
+    description: Basit takvim kayıtları
+  - name: Timers
+    description: Süre başlatma ve durdurma
+  - name: Goals
+    description: Günlük hedef oluşturma, değiştirme ve silme
+  - name: Pomodoro
+    description: Pomodoro zamanlayıcı (25 dakika çalışma + 5 dakika mola)
+  - name: Users
+    description: Avatar ekleme ve ekran teması
+  - name: Progress
+    description: Yüzde tamamlama sistemi ve çalışma serisi
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Kullanıcı Girişi
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              email: "user@example.com"
+              password: "P@ssw0rd!"
+      responses:
+        "200":
+          description: Giriş başarılı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Kimlik doğrulama başarısız
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/auth/password-reset:
+    post:
+      tags:
+        - Auth
+      summary: Şifre Yenileme (tek kullanımlık kod)
+      operationId: passwordReset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequest"
+            example:
+              email: "user@example.com"
+              oneTimeCode: "193847"
+              newPassword: "N3wP@ssw0rd!"
+      responses:
+        "200":
+          description: Şifre yenilendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Kod geçersiz veya istek hatalı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/friends:
+    get:
+      tags:
+        - Friends
+      summary: Arkadaşları Listele
+      operationId: listFriends
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: Arkadaşlar listelendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedFriends"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - Friends
+      summary: Arkadaş Ekleme
+      operationId: addFriend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddFriendRequest"
+            example:
+              friendUserId: "usr_456"
+      responses:
+        "201":
+          description: Arkadaş eklendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Friend"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/friends/{friendUserId}:
+    parameters:
+      - name: friendUserId
+        in: path
+        required: true
+        description: Arkadaşın kullanıcı kimliği
+        schema:
+          type: string
+        example: "usr_456"
+    delete:
+      tags:
+        - Friends
+      summary: Arkadaş silme
+      operationId: deleteFriend
+      responses:
+        "204":
+          description: Arkadaş silindi
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Arkadaş bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/leaderboard:
+    get:
+      tags:
+        - Leaderboard
+      summary: Liderlik Tablosu
+      operationId: getLeaderboard
+      parameters:
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: Liderlik tablosu getirildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/calendar:
+    get:
+      tags:
+        - Calendar
+      summary: Takvim kayıtlarını listele
+      operationId: listCalendarItems
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Başlangıç günü (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+          example: "2026-03-01"
+        - name: to
+          in: query
+          required: false
+          description: Bitiş günü (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+          example: "2026-03-31"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: Takvim kayıtları listelendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedCalendarItems"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - Calendar
+      summary: Takvime kayıt ekle
+      operationId: createCalendarItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarItemCreateRequest"
+            example:
+              date: "2026-03-08"
+              title: "Plan"
+      responses:
+        "201":
+          description: Takvim kaydı oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarItem"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/timers/start:
+    post:
+      tags:
+        - Timers
+      summary: Süre Başlatma
+      operationId: startTimer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TimerStartRequest"
+            example:
+              durationMinutes: 45
+      responses:
+        "201":
+          description: Süre başlatıldı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimerSession"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/timers/stop:
+    post:
+      tags:
+        - Timers
+      summary: Süre Durdurma
+      operationId: stopTimer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TimerStopRequest"
+            example:
+              timerSessionId: "ts_123"
+      responses:
+        "200":
+          description: Süre durduruldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimerSession"
+        "400":
+          description: Geçersiz istek veya oturum zaten durdurulmuş
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/goals/daily:
+    post:
+      tags:
+        - Goals
+      summary: Günlük Hedef Oluşturma
+      operationId: createDailyGoal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DailyGoalCreateRequest"
+            example:
+              date: "2026-03-06"
+              targetMinutes: 120
+      responses:
+        "201":
+          description: Günlük hedef oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyGoal"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/goals/daily/{dailyGoalId}:
+    parameters:
+      - name: dailyGoalId
+        in: path
+        required: true
+        description: Günlük hedefin kimliği
+        schema:
+          type: string
+        example: "dg_123"
+    put:
+      tags:
+        - Goals
+      summary: Hedef Değiştirme (Günlük hedef güncelle)
+      operationId: updateDailyGoal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DailyGoalUpdateRequest"
+            example:
+              targetMinutes: 150
+      responses:
+        "200":
+          description: Günlük hedef güncellendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyGoal"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Günlük hedef bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - Goals
+      summary: Hedef Silme (Günlük hedef sil)
+      operationId: deleteDailyGoal
+      responses:
+        "204":
+          description: Günlük hedef silindi
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Günlük hedef bulunamadı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/pomodoro/start:
+    post:
+      tags:
+        - Pomodoro
+      summary: Pomodoro Zamanlayıcı Başlat (25/5 sabit)
+      operationId: startPomodoro
+      responses:
+        "201":
+          description: Pomodoro başlatıldı
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PomodoroRun"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/pomodoro/stop:
+    post:
+      tags:
+        - Pomodoro
+      summary: Pomodoro Zamanlayıcı Durdur
+      operationId: stopPomodoro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PomodoroStopRequest"
+            example:
+              pomodoroRunId: "pr_123"
+      responses:
+        "200":
+          description: Pomodoro durduruldu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PomodoroRun"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/users/avatar:
+    post:
+      tags:
+        - Users
+      summary: Avatar Ekleme
+      operationId: uploadAvatar
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/AvatarUploadRequest"
+      responses:
+        "200":
+          description: Avatar güncellendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvatarResponse"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/users/theme:
+    get:
+      tags:
+        - Users
+      summary: Ekran Temasını Getir
+      operationId: getTheme
+      responses:
+        "200":
+          description: Tema getirildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeSettings"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Users
+      summary: Ekran Temasını Güncelle
+      operationId: updateTheme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThemeSettings"
+            example:
+              mode: "dark"
+      responses:
+        "200":
+          description: Tema güncellendi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeSettings"
+        "400":
+          description: Geçersiz istek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/progress/completion:
+    get:
+      tags:
+        - Progress
+      summary: Yüzde Tamamlama Sistemi
+      operationId: getCompletion
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: Gün (YYYY-MM-DD). Verilmezse bugün kabul edilir.
+          schema:
+            type: string
+            format: date
+          example: "2026-03-06"
+      responses:
+        "200":
+          description: Tamamlama bilgisi getirildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompletionResponse"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/progress/streak:
+    get:
+      tags:
+        - Progress
+      summary: Çalışma Serisi (Streak)
+      operationId: getStreak
+      responses:
+        "200":
+          description: Streak bilgisi getirildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreakResponse"
+        "401":
+          description: Yetkisiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Authorization: Bearer <token>"
+
+  parameters:
+    page:
+      name: page
+      in: query
+      required: false
+      description: Sayfa numarası (varsayılan 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      example: 1
+    limit:
+      name: limit
+      in: query
+      required: false
+      description: Sayfa başına sonuç sayısı (varsayılan 10, maksimum 50)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 10
+      example: 10
+
+  schemas:
+    Error:
+      type: object
+      description: Hata durumlarında döndürülen standart hata yanıtı
+      properties:
+        message:
+          type: string
+          example: "Geçersiz istek"
+      required:
+        - message
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "İşlem başarılı"
+      required:
+        - message
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          example: "P@ssw0rd!"
+      required:
+        - email
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "jwt_access_token"
+      required:
+        - accessToken
+
+    PasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        oneTimeCode:
+          type: string
+          description: Tek kullanımlık kod
+          example: "193847"
+        newPassword:
+          type: string
+          minLength: 8
+          example: "N3wP@ssw0rd!"
+      required:
+        - email
+        - oneTimeCode
+        - newPassword
+
+    AddFriendRequest:
+      type: object
+      properties:
+        friendUserId:
+          type: string
+          example: "usr_456"
+      required:
+        - friendUserId
+
+    Friend:
+      type: object
+      properties:
+        friendUserId:
+          type: string
+          example: "usr_456"
+        addedAt:
+          type: string
+          format: date-time
+          example: "2026-03-06T10:10:00Z"
+      required:
+        - friendUserId
+        - addedAt
+
+    PaginatedFriends:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Friend"
+      required:
+        - page
+        - limit
+        - total
+        - items
+
+    CalendarItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "cal_123"
+        date:
+          type: string
+          format: date
+          example: "2026-03-08"
+        title:
+          type: string
+          example: "Plan"
+      required:
+        - id
+        - date
+        - title
+
+    CalendarItemCreateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-03-08"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Plan"
+      required:
+        - date
+        - title
+
+    PaginatedCalendarItems:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CalendarItem"
+      required:
+        - page
+        - limit
+        - total
+        - items
+
+    TimerStartRequest:
+      type: object
+      properties:
+        durationMinutes:
+          type: integer
+          minimum: 1
+          example: 45
+      required:
+        - durationMinutes
+
+    TimerStopRequest:
+      type: object
+      properties:
+        timerSessionId:
+          type: string
+          example: "ts_123"
+      required:
+        - timerSessionId
+
+    TimerSession:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "ts_123"
+        durationMinutes:
+          type: integer
+          example: 45
+        startedAt:
+          type: string
+          format: date-time
+          example: "2026-03-06T10:30:00Z"
+        stoppedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-03-06T11:10:00Z"
+      required:
+        - id
+        - durationMinutes
+        - startedAt
+
+    DailyGoal:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "dg_123"
+        date:
+          type: string
+          format: date
+          example: "2026-03-06"
+        targetMinutes:
+          type: integer
+          minimum: 1
+          example: 120
+      required:
+        - id
+        - date
+        - targetMinutes
+
+    DailyGoalCreateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-03-06"
+        targetMinutes:
+          type: integer
+          minimum: 1
+          example: 120
+      required:
+        - date
+        - targetMinutes
+
+    DailyGoalUpdateRequest:
+      type: object
+      properties:
+        targetMinutes:
+          type: integer
+          minimum: 1
+          example: 150
+      required:
+        - targetMinutes
+
+    PomodoroRun:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "pr_123"
+        focusMinutes:
+          type: integer
+          example: 25
+        breakMinutes:
+          type: integer
+          example: 5
+        startedAt:
+          type: string
+          format: date-time
+          example: "2026-03-06T12:00:00Z"
+        stoppedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-03-06T12:25:00Z"
+      required:
+        - id
+        - focusMinutes
+        - breakMinutes
+        - startedAt
+
+    PomodoroStopRequest:
+      type: object
+      properties:
+        pomodoroRunId:
+          type: string
+          example: "pr_123"
+      required:
+        - pomodoroRunId
+
+    AvatarUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
+
+    AvatarResponse:
+      type: object
+      properties:
+        avatarUrl:
+          type: string
+          example: "https://cdn.example.com/avatars/usr_123.png"
+      required:
+        - avatarUrl
+
+    ThemeSettings:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - light
+            - dark
+          example: "dark"
+      required:
+        - mode
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+          example: 1
+        userId:
+          type: string
+          example: "usr_999"
+        username:
+          type: string
+          example: "user1"
+        totalStudyMinutes:
+          type: integer
+          example: 520
+      required:
+        - rank
+        - userId
+        - username
+        - totalStudyMinutes
+
+    LeaderboardResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+      required:
+        - items
+
+    CompletionResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-03-06"
+        targetMinutes:
+          type: integer
+          example: 120
+        studiedMinutes:
+          type: integer
+          example: 60
+        completionPercent:
+          type: number
+          format: float
+          example: 50.0
+      required:
+        - date
+        - targetMinutes
+        - studiedMinutes
+        - completionPercent
+
+    StreakResponse:
+      type: object
+      properties:
+        currentStreakDays:
+          type: integer
+          example: 5
+        longestStreakDays:
+          type: integer
+          example: 14
+      required:
+        - currentStreakDays
+        - longestStreakDays
