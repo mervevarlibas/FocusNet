@@ -5,7 +5,14 @@
 ## 1. Günlük Hedef   Oluşturma
 - **Endpoint:** `POST /api/goals/daily`
 - **Request Body:**
+    ```json
+  {
+    "date": "2026-03-06",
+  "targetMinutes": 120
+  }
+  ```
 - **Response:** `201 Created` -Günlük hedef oluşturuldu.
+- **Authentication:** Bearer Token gerekli
 
 ## 2. Arkadaş Silme
 - **Endpoint:** `DELETE /api/friends/{friendUserId}`
@@ -18,6 +25,15 @@
 - **Endpoint:** `GET /api/progress/completion`
 - **Authentication:** Bearer Token gerekli
 -  **Response:** `200 OK` -Yüzde tamamlama bilgisi getirildi
+- **Request Body:** 
+    ```json
+  {
+    "date": "2026-03-06",
+  "targetMinutes": 120,
+  "studiedMinutes": 60,
+  "completionPercent": 50.0
+  }
+  ```
 
 ## 4. Çalışma Serisi
 - **Endpoint:** `GET /api/progress/streak`
@@ -43,10 +59,22 @@
 ## 7. Ekran Teması
 - **Endpoint:** `PUT  /api/users/theme`
 - **Authentication:** Bearer Token gerekli
-- **Response:** `200 OK` -Ekran Teması getirildi
+- **Response:** `200 OK` -Ekran Teması getirildi,
+- **Request Body:** 
+  ```json
+  {
+    "mode": "dark" // "light" veya "dark"
+  }
+  ```
 
 ## 8. Süre Durdurma
 - **Endpoint:** `POST /api/timers/stop`
 - **Response:** `200` -Süre durduruldu
 - **Authentication:** Bearer Token gerekli
+- **Request Body:** 
+  ```json
+  {
+    "timerSessionId": "ts_123"
+  }
+  ```
 
