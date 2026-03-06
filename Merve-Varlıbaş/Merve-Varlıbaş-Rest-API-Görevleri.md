@@ -39,13 +39,6 @@
 - **Endpoint:** `GET /api/progress/streak`
 - **Authentication:** Bearer Token gerekli
 - **Response:** `200 OK` -Mevcut ve en uzun çalışma serisi bilgisi getirildi
-- **Request Body:**
-    ```json
-  {
- "currentStreakDays": 5,
- "longestStreakDays": 14
-  }
-  ```
 
 ## 5. Hedef Değiştirme
 - **Endpoint:** `UPDATE /api/goals/daily/{dailyGoalId}`
