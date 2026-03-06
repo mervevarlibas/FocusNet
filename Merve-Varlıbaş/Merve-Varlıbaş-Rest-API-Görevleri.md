@@ -43,7 +43,7 @@
     ```json
   {
  "currentStreakDays": 5,
-  "longestStreakDays": 14
+ "longestStreakDays": 14
   }
   ```
 
