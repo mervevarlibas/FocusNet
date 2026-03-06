@@ -1,5 +1,5 @@
 1. **Kullanıcı Girişi**
-   - **API Metodu:** `POST /api/auth/login`
+   - **API Metodu:** `POST /api/auth/login` 
    - **Açıklama:** Kullanıcı hesap oluşturur ve giriş yapar.Kullanıcılar email adresi veya telefon numarası ile şifre belirleyerek hesap oluşturur.
 
 2. **Arkadaş ekleme**
