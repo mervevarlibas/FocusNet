@@ -7,7 +7,7 @@
 ## Grup Üyelerinin Web Frontend Görevleri
 
 1. [Merve Varlıbaş'ın Web Frontend Görevleri](Merve-Varlıbaş/Merve-Varlıbaş-Web-Frontend-Gorevleri.md)
-2. [Dilan Alma'nın Web Frontend Görevleri](Dilan-Alma-2/Dilan-Alma-2-Frontend-Gorevleri.md)
+2. [Dilan Alma'nın Web Frontend Görevleri](Dilan-Alma-2/Dilan-Alma-Frontend-Gorevleri.md)
 
 ---
 
