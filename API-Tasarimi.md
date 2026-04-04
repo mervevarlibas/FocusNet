@@ -10,7 +10,7 @@ info:
   title: FocusNet Ders Çalışma Uygulaması API'si
   description: |
     FocusNet platformu için hazırlanmış RESTful API.
-    
+  
     ## Özellikler
     - Kullanıcı girişi ve şifre yenileme
     - Arkadaş ekleme, listeleme ve silme
