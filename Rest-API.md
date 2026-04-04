@@ -1,6 +1,6 @@
 # REST API Görev Dağılımı
 
-**REST API Adresi:** [api.focusnet.com] (https://focusnet-api.onrender.com/)
+**REST API Adresi:** [api.focusnet.com] (https://focusnet-api.onrender.com)
 
 ## Grup Üyelerinin REST API Metotları
 
