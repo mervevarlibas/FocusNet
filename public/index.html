@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusNet — Ders Çalışma Platformu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="theme-dark">
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-mark">◈</span>
+      <span class="brand-name">FocusNet</span>
+    </div>
+    <nav class="nav-main" id="navMain" hidden>
+      <button type="button" class="nav-btn active" data-view="dashboard">Panel</button>
+      <button type="button" class="nav-btn" data-view="pomodoro">Pomodoro</button>
+      <button type="button" class="nav-btn" data-view="calendar">Takvim</button>
+      <button type="button" class="nav-btn" data-view="friends">Arkadaşlar</button>
+      <button type="button" class="nav-btn" data-view="leaderboard">Liderlik</button>
+      <button type="button" class="nav-btn" data-view="profile">Profil</button>
+    </nav>
+    <div class="header-actions" id="headerActions" hidden>
+      <button type="button" class="btn-icon theme-toggle" id="themeToggle" title="Tema">☾</button>
+      <button type="button" class="btn-ghost" id="logoutBtn">Çıkış</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Auth -->
+    <section class="view auth-view" id="viewAuth">
+      <div class="card card-auth glass">
+        <h1 class="auth-title">FocusNet</h1>
+        <p class="auth-sub">Odaklan. İlerle. Parla.</p>
+        <div class="tabs">
+          <button type="button" class="tab active" data-tab="login">Giriş</button>
+          <button type="button" class="tab" data-tab="register">Kayıt</button>
+        </div>
+        <form id="formLogin" class="form-auth">
+          <label>E-posta<input type="email" id="loginEmail" required autocomplete="email" /></label>
+          <label>Şifre<input type="password" id="loginPassword" required autocomplete="current-password" /></label>
+          <p class="form-error" id="loginError" hidden></p>
+          <button type="submit" class="btn-primary btn-glow">Giriş Yap</button>
+          <button type="button" class="link-btn" id="showReset">Şifremi unuttum / yanlış şifre</button>
+        </form>
+        <form id="formRegister" class="form-auth" hidden>
+          <label>Ad<input type="text" id="regName" maxlength="80" placeholder="Görünen ad" /></label>
+          <label>E-posta<input type="email" id="regEmail" required autocomplete="email" /></label>
+          <label>Şifre (min. 6)<input type="password" id="regPassword" required autocomplete="new-password" /></label>
+          <p class="form-error" id="regError" hidden></p>
+          <button type="submit" class="btn-primary btn-glow">Kayıt Ol</button>
+        </form>
+        <form id="formReset" class="form-auth" hidden>
+          <p class="hint">Hesabınızın e-postası ve yeni şifreniz</p>
+          <label>E-posta<input type="email" id="resetEmail" required autocomplete="email" /></label>
+          <label>Yeni şifre<input type="password" id="resetPassword" required autocomplete="new-password" /></label>
+          <p class="form-error" id="resetError" hidden></p>
+          <p class="form-success" id="resetOk" hidden></p>
+          <button type="submit" class="btn-primary btn-glow">Şifreyi Sıfırla</button>
+          <button type="button" class="link-btn" id="backToLogin">Girişe dön</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="view" id="viewDashboard" hidden>
+      <div class="layout-dashboard">
+        <div class="card glass panel-hero">
+          <div class="user-chip" id="userChip">
+            <span class="avatar" id="dashAvatar">A</span>
+            <div>
+              <strong id="dashName">—</strong>
+              <span class="muted" id="dashEmail">—</span>
+            </div>
+          </div>
+          <div class="streak-box">
+            <span class="streak-icon">⚡</span>
+            <div>
+              <span class="streak-val" id="dashStreak">0</span>
+              <span class="streak-label">gün üst üste</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card glass panel-timer">
+          <h2>Serbest süre</h2>
+          <div class="timer-display" id="freeTimerDisplay">00:00:00</div>
+          <div class="timer-actions">
+            <button type="button" class="btn-primary btn-glow" id="freeStart">Başlat</button>
+            <button type="button" class="btn-secondary" id="freeStop" disabled>Durdur &amp; Kaydet</button>
+          </div>
+          <p class="hint" id="freeHint">Durdur dediğinizde geçen süre günlük hedefe eklenir.</p>
+        </div>
+
+        <div class="card glass panel-goal">
+          <h2>Günlük hedef</h2>
+          <div class="progress-ring-wrap">
+            <svg class="progress-ring" viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="gradRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#2dd4bf" />
+                  <stop offset="100%" stop-color="#22d3ee" />
+                </linearGradient>
+              </defs>
+              <circle class="ring-bg" cx="60" cy="60" r="52" />
+              <circle class="ring-fill" id="goalRing" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="progress-center">
+              <span id="goalPercent">0%</span>
+            </div>
+          </div>
+          <p class="goal-stats"><span id="goalDone">0</span> / <span id="goalTarget">0</span> dk</p>
+          <form id="formGoal" class="inline-form">
+            <label>Saat<input type="number" id="goalH" min="0" max="23" value="1" /></label>
+            <label>Dakika<input type="number" id="goalM" min="0" max="59" value="0" /></label>
+            <button type="submit" class="btn-secondary">Hedef oluştur / güncelle</button>
+          </form>
+          <button type="button" class="btn-danger-outline" id="deleteTodayGoal">Bugünkü hedefi sil</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pomodoro -->
+    <section class="view" id="viewPomodoro" hidden>
+      <div class="card glass pomodoro-card">
+        <h2>Pomodoro</h2>
+        <p class="muted">25 dk çalışma · 5 dk mola</p>
+        <div class="pomo-phase" id="pomoPhase">Çalışma</div>
+        <div class="timer-display large" id="pomoDisplay">25:00</div>
+        <div class="timer-actions">
+          <button type="button" class="btn-primary btn-glow" id="pomoStart">Başlat</button>
+          <button type="button" class="btn-secondary" id="pomoPause" disabled>Duraklat</button>
+          <button type="button" class="btn-secondary" id="pomoStop" disabled>Bitir</button>
+        </div>
+        <p class="hint" id="pomoHint">Çalışma periyodu tamamlanınca süre otomatik kaydedilir.</p>
+      </div>
+    </section>
+
+    <!-- Calendar -->
+    <section class="view" id="viewCalendar" hidden>
+      <div class="card glass calendar-card">
+        <div class="cal-head">
+          <button type="button" class="btn-icon" id="calPrev">‹</button>
+          <h2 id="calTitle">—</h2>
+          <button type="button" class="btn-icon" id="calNext">›</button>
+        </div>
+        <div class="cal-weekdays">
+          <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </section>
+
+    <!-- Friends -->
+    <section class="view" id="viewFriends" hidden>
+      <div class="card glass">
+        <h2>Arkadaş ekle</h2>
+        <form id="formAddFriend" class="inline-form full">
+          <input type="email" id="friendEmail" placeholder="arkadas@ornek.com" required />
+          <button type="submit" class="btn-primary btn-glow">Ekle</button>
+        </form>
+        <p class="form-error" id="friendError" hidden></p>
+        <h3 class="list-title">Arkadaş listesi</h3>
+        <ul class="friend-list" id="friendList"></ul>
+      </div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section class="view" id="viewLeaderboard" hidden>
+      <div class="card glass">
+        <h2>Liderlik tablosu</h2>
+        <p class="muted" id="lbMe">—</p>
+        <ol class="lb-list" id="lbList"></ol>
+      </div>
+    </section>
+
+    <!-- Profile -->
+    <section class="view" id="viewProfile" hidden>
+      <div class="card glass profile-card">
+        <h2>Profil</h2>
+        <p class="muted">Avatar seçimi</p>
+        <div class="avatar-picker" id="avatarPicker"></div>
+        <label>Ad<input type="text" id="profileName" maxlength="80" /></label>
+        <button type="button" class="btn-primary btn-glow" id="saveProfile">Kaydet</button>
+        <p class="form-success" id="profileOk" hidden>Kaydedildi</p>
+        <hr class="sep" />
+        <p class="muted">Tema sunucuya da kaydedilir; tarayıcıda da saklanır (siteye dönünce aynı kalır).</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>FocusNet</span>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: focusnet
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Render panelinden ekleyin (Asla repoya yazmayın):
+      # MONGODB_URI — MongoDB Atlas bağlantı dizesi
+      # JWT_SECRET — openssl rand -hex 32 benzeri uzun rastgele metin
