@@ -1,4 +1,4 @@
-# FOCUSNET
+git oo# FOCUSNET
 
 ## PROJE HAKKINDA
 
