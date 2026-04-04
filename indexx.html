@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusNet — Odak & çalışma takibi</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2322d3ee' d='M16 1l3.8 13.2L32 16l-12.2 4.2L16 31l-3.8-13.2L0 16l12.2-4.2z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <section id="view-auth" class="view auth-view">
+      <div class="auth-atmosphere" aria-hidden="true"></div>
+      <div class="auth-center">
+        <div class="auth-card card auth-card-pro">
+            <header class="brand brand-wordmark">
+              <h1 class="wordmark"><span class="wm-focus">Focus</span><span class="wm-net">Net</span></h1>
+              <p class="brand-tagline">Zamanı değil, odağı yönet.</p>
+              <p class="brand-lead muted">Odak, hedef ve çalışma ritmini tek yerde topla.</p>
+            </header>
+
+            <div id="auth-forms-block">
+              <div class="tabs">
+                <button type="button" class="tab active" data-auth-tab="login">Giriş</button>
+                <button type="button" class="tab" data-auth-tab="register">Kayıt</button>
+              </div>
+
+              <form id="form-login" class="auth-form active">
+                <label>Kullanıcı adı<input type="text" id="login-user" autocomplete="username" required /></label>
+                <label>Şifre<input type="password" id="login-pass" autocomplete="current-password" required /></label>
+                <button type="submit" class="btn primary">Giriş yap</button>
+                <p class="auth-foot">
+                  <button type="button" class="link-inline" id="btn-show-recover">Hesabına giremiyor musun? Şifre sıfırla</button>
+                </p>
+              </form>
+
+              <form id="form-register" class="auth-form">
+                <label>Ad soyad<input type="text" id="reg-name" required /></label>
+                <label>Kullanıcı adı<input type="text" id="reg-user" pattern="[a-zA-Z0-9_]{3,20}" title="3–20 karakter, harf rakam _" autocomplete="username" required /></label>
+                <label>Şifre<input type="password" id="reg-pass" minlength="4" autocomplete="new-password" required /></label>
+                <p class="hint">Profilden oyun tarzı karakter avatarı seçebilirsin.</p>
+                <button type="submit" class="btn primary">Kayıt ol</button>
+              </form>
+            </div>
+
+            <div id="recover-block" class="recover-block hidden">
+              <h2 class="recover-heading">Şifre sıfırlama</h2>
+              <p class="muted recover-desc">Kayıtlı kullanıcı adın ve yeni şifren ile hesabına yeniden eriş.</p>
+              <form id="form-reset">
+                <label>Kullanıcı adı<input type="text" id="reset-user" required autocomplete="username" /></label>
+                <label>Yeni şifre<input type="password" id="reset-pass" minlength="4" required autocomplete="new-password" /></label>
+                <button type="submit" class="btn primary">Şifreyi güncelle</button>
+              </form>
+              <p class="auth-foot">
+                <button type="button" class="link-inline" id="btn-back-login">← Giriş ekranına dön</button>
+              </p>
+            </div>
+
+            <p id="auth-message" class="message" role="status"></p>
+            <p class="site-foot">focusnet.com</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-main" class="view main-view hidden">
+      <header class="topbar">
+        <div class="topbar-left">
+          <span class="brand-small"><span class="bs-wm-f">Focus</span><span class="bs-wm-n">Net</span></span>
+        </div>
+        <nav class="nav-pills">
+          <button type="button" class="pill active" data-page="dashboard">Panel</button>
+          <button type="button" class="pill" data-page="timer">Süre & Pomodoro</button>
+          <button type="button" class="pill" data-page="goals">Hedefler</button>
+          <button type="button" class="pill" data-page="friends">Arkadaşlar</button>
+          <button type="button" class="pill" data-page="leaderboard">Liderlik</button>
+          <button type="button" class="pill" data-page="calendar">Takvim</button>
+          <button type="button" class="pill" data-page="stats">İstatistikler</button>
+          <button type="button" class="pill" data-page="profile">Profil</button>
+        </nav>
+        <div class="topbar-right">
+          <button type="button" id="theme-toggle" class="btn ghost icon-btn" title="Tema">◐</button>
+          <span id="header-user" class="header-user"></span>
+          <button type="button" id="btn-logout" class="btn ghost">Çıkış</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <div id="page-dashboard" class="page active">
+          <h2 class="page-title">Merhaba, <span id="dash-name"></span></h2>
+          <div class="grid-3">
+            <div class="card stat-card glow-edge">
+              <h3>Bugün</h3>
+              <p class="big" id="dash-today">0 dk</p>
+              <p class="muted">Günlük hedef: <span id="dash-daily-goal">—</span></p>
+              <div class="progress-wrap">
+                <div class="progress-bar"><div id="dash-daily-bar" class="progress-fill"></div></div>
+                <span id="dash-daily-pct" class="pct">0%</span>
+              </div>
+            </div>
+            <div class="card stat-card glow-edge">
+              <h3>Bu hafta</h3>
+              <p class="big" id="dash-week">0 dk</p>
+              <p class="muted">Haftalık hedef: <span id="dash-week-goal">—</span></p>
+              <div class="progress-wrap">
+                <div class="progress-bar"><div id="dash-week-bar" class="progress-fill week"></div></div>
+                <span id="dash-week-pct" class="pct">0%</span>
+              </div>
+            </div>
+            <div class="card stat-card streak-card glow-edge accent-gold">
+              <h3>Çalışma serisi</h3>
+              <p class="big" id="dash-streak">0 gün</p>
+              <p class="muted">Art arda çalıştığın gün sayısı</p>
+            </div>
+          </div>
+          <div class="card quick-actions glow-edge">
+            <h3>Hızlı erişim</h3>
+            <div class="actions-row">
+              <button type="button" class="btn primary" data-goto="timer">Süre başlat</button>
+              <button type="button" class="btn secondary" data-goto="goals">Hedefleri düzenle</button>
+              <button type="button" class="btn secondary" data-goto="friends">Arkadaş ekle</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-timer" class="page">
+          <h2 class="page-title">Çalışma süresi</h2>
+          <div class="grid-2">
+            <div class="card timer-card glow-edge">
+              <h3>Serbest süre</h3>
+              <p class="timer-display" id="timer-free">00:00:00</p>
+              <div class="timer-btns">
+                <button type="button" id="btn-free-start" class="btn primary">Başlat</button>
+                <button type="button" id="btn-free-pause" class="btn secondary" disabled>Duraklat</button>
+                <button type="button" id="btn-free-stop" class="btn danger" disabled>Bitir & kaydet</button>
+              </div>
+              <p class="hint">Bitir ile bugünkü süreye eklenir.</p>
+            </div>
+            <div class="card timer-card pomodoro-card glow-edge">
+              <h3>Pomodoro (25 / 5)</h3>
+              <p class="muted" id="pomo-phase">Çalışma</p>
+              <p class="timer-display pomo" id="timer-pomo">25:00</p>
+              <div class="timer-btns">
+                <button type="button" id="btn-pomo-start" class="btn primary">Başlat</button>
+                <button type="button" id="btn-pomo-pause" class="btn secondary" disabled>Duraklat</button>
+                <button type="button" id="btn-pomo-reset" class="btn ghost">Sıfırla</button>
+              </div>
+              <p class="hint">25 dk çalışma, 5 dk mola; çalışma turu bitince süre günlüğe eklenir.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-goals" class="page">
+          <h2 class="page-title">Günlük & haftalık hedef</h2>
+          <div class="card glow-edge">
+            <form id="form-goals" class="goals-form">
+              <label>Günlük hedef (dakika)<input type="number" id="goal-daily" min="1" max="1440" required /></label>
+              <label>Haftalık hedef (dakika)<input type="number" id="goal-weekly" min="1" max="10080" required /></label>
+              <button type="submit" class="btn primary">Hedefleri kaydet</button>
+            </form>
+            <p id="goals-message" class="message"></p>
+          </div>
+        </div>
+
+        <div id="page-friends" class="page">
+          <h2 class="page-title">Arkadaşlar</h2>
+          <div class="card glow-edge">
+            <form id="form-add-friend" class="inline-form">
+              <label>Kullanıcı adı ile ekle<input type="text" id="friend-user" placeholder="kullanici_adi" /></label>
+              <button type="submit" class="btn primary">Ekle</button>
+            </form>
+            <p id="friends-message" class="message"></p>
+            <h3 class="subheading">Bugün kaç dakika çalıştılar?</h3>
+            <ul id="friends-list" class="friends-list"></ul>
+          </div>
+        </div>
+
+        <div id="page-leaderboard" class="page">
+          <h2 class="page-title">Liderlik tablosu</h2>
+          <div class="card glow-edge">
+            <div class="tabs small">
+              <button type="button" class="tab active" data-lb="today">Bugün</button>
+              <button type="button" class="tab" data-lb="week">Bu hafta</button>
+            </div>
+            <ol id="leaderboard-list" class="leaderboard"></ol>
+          </div>
+        </div>
+
+        <div id="page-calendar" class="page">
+          <h2 class="page-title">Takvim</h2>
+          <div class="card calendar-card glow-edge">
+            <div class="cal-nav">
+              <button type="button" id="cal-prev" class="btn ghost">←</button>
+              <h3 id="cal-title"></h3>
+              <button type="button" id="cal-next" class="btn ghost">→</button>
+            </div>
+            <div class="cal-weekdays">
+              <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+            </div>
+            <div id="cal-grid" class="cal-grid"></div>
+            <p class="hint">Hücrelerde o günün çalışma süresi (saat / dakika) gösterilir.</p>
+          </div>
+        </div>
+
+        <div id="page-stats" class="page">
+          <h2 class="page-title">İstatistikler</h2>
+          <div class="grid-2">
+            <div class="card glow-edge">
+              <h3>Özet</h3>
+              <ul class="stats-list">
+                <li>Toplam kayıtlı gün: <strong id="stat-days">0</strong></li>
+                <li>Toplam çalışma: <strong id="stat-total-min">0</strong></li>
+                <li>Ortalama / gün: <strong id="stat-avg">0</strong></li>
+                <li>En iyi gün: <strong id="stat-best">—</strong></li>
+              </ul>
+            </div>
+            <div class="card glow-edge">
+              <h3>Son 7 gün</h3>
+              <div id="stat-bars" class="stat-bars"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-profile" class="page">
+          <h2 class="page-title">Profil</h2>
+          <div class="card profile-card glow-edge">
+            <div class="profile-preview">
+              <span id="profile-avatar-big" class="avatar-big"></span>
+              <div>
+                <p class="profile-name" id="profile-display-name"></p>
+                <p class="muted" id="profile-username"></p>
+              </div>
+            </div>
+            <label>Ad soyad<input type="text" id="profile-name-input" /></label>
+            <p class="subheading">Avatar seç</p>
+            <div id="avatar-picker" class="avatar-picker"></div>
+            <button type="button" id="btn-save-profile" class="btn primary">Profili kaydet</button>
+            <p id="profile-message" class="message"></p>
+          </div>
+        </div>
+      </main>
+    </section>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
