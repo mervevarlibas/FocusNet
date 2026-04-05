@@ -1,6 +1,6 @@
 # Dilan Alma'nın REST API Metotları
 
-**API Test Videosu:** [Link buraya eklenecek](https://example.com)
+**API Test Videosu:** [Test videosu](https://youtu.be/D2KZqTwJDB4)
 
 ## 1. Kullanıcı Girişi
 - **Endpoint:** `POST /api/auth/login`
