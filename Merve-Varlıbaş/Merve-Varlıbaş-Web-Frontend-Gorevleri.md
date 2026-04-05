@@ -1,5 +1,5 @@
 # Merve Varlıbaş'ın Web Frontend Görevleri
-**Front-end Test Videosu:** [Link buraya eklenecek](https://example.com)
+**Front-end Test Videosu:** [test videosu](https://youtu.be/wTtKB7BEuV8)
 
 ## 1. Günlük Hedef ve Yüzde Tamamlama Sistemi
 - **API Endpoint:** `POST /api/goals, GET /api/me, DELETE /api/goals/{date}`
