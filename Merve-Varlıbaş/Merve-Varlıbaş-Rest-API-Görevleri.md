@@ -1,6 +1,6 @@
 # Merve Varlıbaş'ın REST API Metotları
 
-**API Test Videosu:** [Link buraya eklenecek](https://www.youtube.com/watch?v=Xq09C4bF-Vs)
+**API Test Videosu:** [test videosu](https://www.youtube.com/watch?v=Xq09C4bF-Vs)
 
 ## 1. Günlük Hedef   Oluşturma
 - **Endpoint:** `POST /api/goals/daily`
