@@ -1,5 +1,5 @@
 # Dilan Alma'ın Web Frontend Görevleri
-**Front-end Test Videosu:** [Link buraya eklenecek](https://example.com)
+**Front-end Test Videosu:** [Test Videosu](https://youtu.be/a_5kTvcUYls)
 ## 1.Kullanıcı Girişi (Login) Sayfası
 - **API Endpoint:** `POST /api/auth/login`
 - **Görev:** Kayıtlı kullanıcıların sisteme güvenli şekilde giriş yapabilmesi ve oturum yönetiminin başlatılması.
