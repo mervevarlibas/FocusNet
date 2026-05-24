@@ -1,3 +1,18 @@
 node_modules/
 .env
+mobile/.env
 *.log
+
+# Yerel kurulum notları (GitHub'a gitmez)
+KURULUM.md
+KURULUM.local.md
+*.local.md
+
+# IDE
+.vs/
+.vscode/
+
+# Expo / mobil
+mobile/.expo/
+mobile/dist/
+mobile/.claude/
