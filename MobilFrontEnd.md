@@ -3,8 +3,8 @@
 ---
 ## Grup Üyelerinin Mobil Frontend Görevleri
 
-1. [Merve Varlıbaş'ın Mobil Frontend Görevleri](Merve-Varlıbaş/Merve-Varlıbaş-Mobil-Frontend-Gorevleri.md)
-2. [Dilan Alma'nın Mobil Frontend Görevleri](Dilan-Alma/Dilan-Alma-Mobil-Frontend-Gorevleri.md)
+1. [Merve Varlıbaş'ın Mobil Frontend Görevleri](Merve-Varlıbaş/Merve-Varlıbaş-Mobil-Frontend-Görevleri.md)
+2. [Dilan Alma'nın Mobil Frontend Görevleri](Dilan-Alma/Dilan-Alma-Mobil-Frontend-Görevleri.md)
 ---
 
 ## Genel Mobil Frontend Prensipleri
