@@ -85,3 +85,5 @@
 - **Teknik Detaylar:**
   - Partial Update (Kısmı Güncelleme) yaklaşımı ile sadece gönderilen alanların güncellenmesi.
   - Data Annotation / Validator yapıları ile geçersiz veya sınır dışı verilerin engellenmesi (örn: 400 Bad Request dönülmesi).
+
+
