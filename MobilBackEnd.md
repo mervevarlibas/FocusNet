@@ -6,7 +6,7 @@
 ## Grup Üyelerinin Mobil Backend Görevleri
 
 1. [Merve Varlıbaş'ın Mobil Backend Görevleri](Merve-Varlıbaş/Merve-Varlıbaş-Mobil-Backend-Görevleri.md)
-2. [Grup Üyesi 2'nin Mobil Backend Görevleri](Dilan-Alma/Dilan-Alma-Mobil-Backend-Gorevleri.md)
+2. [Dilan Alma'nın Mobil Backend Görevleri](Dilan-Alma/Dilan-Alma-Mobil-Backend-Gorevleri.md)
 
 ## Genel Mobil Backend Prensipleri
 
