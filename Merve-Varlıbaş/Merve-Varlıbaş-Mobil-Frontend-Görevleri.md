@@ -12,29 +12,29 @@
 - **Form Validasyonu:**
   - Saat ve dakika alanlarına sadece rakam girilebilmesi
   - Boş bırakılan alanlarda kaydet butonunun disabled olması
-  - **Kullanıcı Deneyimi:**
+- **Kullanıcı Deneyimi:**
   - Hedef silme işleminde destructive action uyarı dialog'u ("Hedefi silmek istediğinize emin misiniz?")
   -Veri yüklenirken loading skeleton gösterimi
-  - **Teknik Detaylar:**
+- **Teknik Detaylar:**
   - Platform: Android (Jetpack Compose/Canvas) veya iOS (SwiftUI/Path) ile özel çizim (Custom Painter)
   - API'den gelen ilerleme yüzdesinin arayüze gerçek zamanlı entegrasyonu
 
  ## 2.Serbest Süre Takibi(Stopwatch) Ekranı
- - **API Endpoint:** `POST /api/study/log`
+- **API Endpoint:** `POST /api/study/log`
 - **Görev:** Kullanıcının plansız (serbest) çalışma sürelerini takip etmesi ve mobilde kaydedebilmesi için arayüz implementasyonu.
 - **UI Bileşenleri:**
   - "Başlat" butonu (primary button)
   - "Durdur & Kaydet" butonu (secondary/outline button)
   - HH:MM:SS formatında dinamik dijital zamanlayıcı metni (Monospace font)
-  - **Kullanıcı Deneyimi:**
+- **Kullanıcı Deneyimi:**
   - Zamanlayıcı başlatıldığında "Başlat" butonunun disabled state'e geçmesi
   - Süre durdurulduğunda sayacın sıfırlanması ve arayüzün "00:00:00" durumuna dönmesi
-  - **Teknik Detaylar:**
+- **Teknik Detaylar:**
   - Milisaniye cinsinden hesaplanan sürenin API'ye gönderilmeden önce dakikaya çevrilmesi (Math calculation)
   - App arka plana (background) alındığında yaşam döngüsü (Lifecycle) yönetimi ile sürenin doğru hesaplanmaya devam etmesi
 
   ## 3.Pomodoro Zamanlayıcı Ekranı
-  - **API Endpoint:** `POST /api/study/log`
+- **API Endpoint:** `POST /api/study/log`
 - **Görev:** Klasik Pomodoro tekniği (25 dk çalışma, 5 dk mola) akışının mobil arayüz tasarımı ve implementasyonu.
 - **UI Bileşenleri:**
   - Mevcut faz göstergesi ("Çalışma" veya "Mola" etiketleri)
@@ -43,12 +43,12 @@
 - **Kullanıcı Deneyimi:**
   - 25 dakikalık çalışma periyodu bittiğinde otomatik olarak 5 dakikalık "Mola" fazına geçiş
   - Duraklatılan sürenin tekrar kaldığı yerden devam ettirilebilmesi
-  - **Teknik Detaylar:**
+- **Teknik Detaylar:**
   - CountDownTimer entegrasyonu ve her saniye UI state güncellemesi
   - Cihaz donanımlarına erişim (Vibrator/Notification Manager)
 
   ## 4.Arkadaş Ekleme ve Silme Akışı
-  - **API Endpoint:** `GET /api/friends, POST /api/friends, DELETE /api/friends/{id}`
+- **API Endpoint:** `GET /api/friends, POST /api/friends, DELETE /api/friends/{id}`
 - **Görev:** Platform içi sosyal etkileşimi sağlamak için arkadaş listesi ve yönetim ekranlarının implementasyonu.
 - **UI Bileşenleri:**
   - Email input alanı (keyboard type: email, arkadaş aramak/eklemek için)
@@ -65,7 +65,7 @@
   - Keyboard dismiss (eklendiği an klavyenin kapanması)
 
   ## 5 .Liderlik Tablosu ve Çalışma Serisi(Streak) Ekranı
-  - **API Endpoint:** `GET /api/leaderboard, GET /api/me`
+- **API Endpoint:** `GET /api/leaderboard, GET /api/me`
 - **Görev:** Kullanıcı motivasyonunu artıracak Streak kartı ve Liderlik sıralamasının mobil arayüzde gösterimi.
 - **UI Bileşenleri:**
   - Sıralama listesi (Kullanıcı adı, toplam süre, streak sayısı sütunları)
@@ -74,7 +74,7 @@
 - **Kullanıcı Deneyimi:**
   - İsim verisi null gelirse fallback olarak email'in ilk kısmını gösterme
   -Kullanıcının kendi hesabının listede özel bir renk/arkaplan (highlight) ile vurgulanması
-  - **Teknik Detaylar:**
+- **Teknik Detaylar:**
   - Birden fazla API çağrısının asenkron yönetimi (Leaderboard listesi ve Me endpoint'i)
   - Scrollable view (kaydırılabilir liste) performansı yönetimi
 
@@ -88,9 +88,9 @@
 - **Form Validasyonu:**
   - Ad alanının boş bırakılmaması
   - Değişiklik yapılmadıysa kaydet butonunun disabled olması
-  - **Kullanıcı Deneyimi:**
+- **Kullanıcı Deneyimi:**
   - Tema anahtarına (Switch) basıldığında uygulamanın yeniden başlatılmasına gerek kalmadan anında Koyu/Açık temaya geçmesi (Optimistic update)
   -Kayıt başarılı olduğunda "Ayarlar Kaydedildi" snackbar bildirimi
-  - **Teknik Detaylar:**
+- **Teknik Detaylar:**
   - Tema bilgisinin yerel hafızaya (SharedPreferences/DataStore/UserDefaults) yazılarak oturumlar arası kalıcılığının (client-side persistence) sağlanması
   - Global Theme Manager yapılandırması (Material Theme colors override)
