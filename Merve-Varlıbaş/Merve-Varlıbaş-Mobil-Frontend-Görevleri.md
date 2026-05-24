@@ -3,7 +3,7 @@
 
 ## 1.Günlük Hedef ve Yüzde Tamamlama Ekranı
 - **API Endpoint:** `POST /api/goals, GET /api/me, DELETE /api/goals/{date}`
-- **Görev:**Kullanıcının günlük çalışma hedefini belirlemesi, güncellemesi ve hedefin gerçekleşme oranını görselleştirmesi için mobil UI tasarımı ve implementasyonu.
+- **Görev:** Kullanıcının günlük çalışma hedefini belirlemesi, güncellemesi ve hedefin gerçekleşme oranını görselleştirmesi için mobil UI tasarımı ve implementasyonu.
 - **UI Bileşenleri:**
   - Progress Ring (İlerlemeyi gösteren dairesel grafik bileşeni)
   - Tamamlanan ve hedef dakika göstergesi (Örn: 45 / 120 dk, büyük tipografi)
@@ -21,7 +21,7 @@
 
  ## 2.Serbest Süre Takibi(Stopwatch) Ekranı
  - **API Endpoint:** `POST /api/study/log`
-- **Görev:**Kullanıcının plansız (serbest) çalışma sürelerini takip etmesi ve mobilde kaydedebilmesi için arayüz implementasyonu.
+- **Görev:** Kullanıcının plansız (serbest) çalışma sürelerini takip etmesi ve mobilde kaydedebilmesi için arayüz implementasyonu.
 - **UI Bileşenleri:**
   - "Başlat" butonu (primary button)
   - "Durdur & Kaydet" butonu (secondary/outline button)
@@ -49,7 +49,7 @@
 
   ## 4.Arkadaş Ekleme ve Silme Akışı
   - **API Endpoint:** `GET /api/friends, POST /api/friends, DELETE /api/friends/{id}`
-- **Görev:**Platform içi sosyal etkileşimi sağlamak için arkadaş listesi ve yönetim ekranlarının implementasyonu.
+- **Görev:** Platform içi sosyal etkileşimi sağlamak için arkadaş listesi ve yönetim ekranlarının implementasyonu.
 - **UI Bileşenleri:**
   - Email input alanı (keyboard type: email, arkadaş aramak/eklemek için)
   - Liste elemanları: Avatar (initial harflerle renkli), Görünen Ad, Email
@@ -66,7 +66,7 @@
 
   ## 5 .Liderlik Tablosu ve Çalışma Serisi(Streak) Ekranı
   - **API Endpoint:** `GET /api/leaderboard, GET /api/me`
-- **Görev:**Kullanıcı motivasyonunu artıracak Streak kartı ve Liderlik sıralamasının mobil arayüzde gösterimi.
+- **Görev:** Kullanıcı motivasyonunu artıracak Streak kartı ve Liderlik sıralamasının mobil arayüzde gösterimi.
 - **UI Bileşenleri:**
   - Sıralama listesi (Kullanıcı adı, toplam süre, streak sayısı sütunları)
   - Pull-to-refresh (Aşağı çekerek yenile) mekanizması
@@ -80,7 +80,7 @@
 
   ## 6.Profil Özelleştirme ve Ekran Teması Sistemi
   - **API Endpoint:** `PUT /api/me`
-- **Görev:**Tema (Koyu/Açık), ad ve avatar rengi gibi kişiselleştirme ayarlarının yapılacağı ekranın implementasyonu.
+- **Görev:** Tema (Koyu/Açık), ad ve avatar rengi gibi kişiselleştirme ayarlarının yapılacağı ekranın implementasyonu.
 - **UI Bileşenleri:**
   - Tema Toggle (Switch bileşeni, ☾/☀ ikonları ile)
   - 8 farklı renge sahip Avatar seçici

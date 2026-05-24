@@ -3,7 +3,7 @@
 
 ## 1.Günlük Hedef ve Yüzde Tamamlama Sistemi
 - **API Endpoint:** `POST /api/goals, GET /api/me, DELETE /api/goals/{date}`
-- **Görev:**Kullanıcının günlük çalışma hedefini belirlemesi, güncellemesi ve bu hedefin gerçekleşme oranını mobil arayüzde görselleştirmesi.
+- **Görev:** Kullanıcının günlük çalışma hedefini belirlemesi, güncellemesi ve bu hedefin gerçekleşme oranını mobil arayüzde görselleştirmesi.
 - **İşlevler:**
   - Dinamik Sayaç: Tamamlanan ve hedef dakika göstergesi (Örn: 45 / 120 dk).
   - Circular Progress View: İlerlemeyi gösteren dairesel grafik bileşeni.
@@ -15,7 +15,7 @@
 
  ## 2.Serbest Süre Takibi ve Durdurma (Stopwatch)
  - **API Endpoint:** `POST /api/study/log`
-- **Görev:**Kullanıcının plansız (serbest) çalışma sürelerini takip etmesi ve süreyi durdurduğunda günlük hedefine eklemesi.
+- **Görev:** Kullanıcının plansız (serbest) çalışma sürelerini takip etmesi ve süreyi durdurduğunda günlük hedefine eklemesi.
 - **İşlevler:**
   - Dijital Saat Görünümü: HH:MM:SS formatında, Monospace font kullanılan büyük zaman metni (TextView/Text Widget).
   - Aksiyon Butonları: Görsel geri bildirimi olan "Başlat" (Primary) ve "Durdur & Kaydet" (Secondary) butonları.
@@ -37,7 +37,7 @@
 
   ## 4.Arkadaş Ekleme ve Silme Akışı
   - **API Endpoint:** `GET /api/friends, POST /api/friends, DELETE /api/friends/{id}`
-- **Görev:**Platform içi sosyal etkileşimi sağlamak için mobil arkadaş listesi oluşturma ve çıkarma işlemleri.
+- **Görev:** Platform içi sosyal etkileşimi sağlamak için mobil arkadaş listesi oluşturma ve çıkarma işlemleri.
 - **İşlevler:**
   - Kullanıcı Deneyimi (UX): Arkadaş silmek için liste elemanını sağa/sola kaydırma (Swipe-to-delete) veya uzun basma (Long press) ile Native onay penceresi açılması.
   - Hata durumunda (kullanıcı bulunamadı vb.) ekranda uyarı mesajı (Snackbar/Toast) gösterimi.
@@ -48,7 +48,7 @@
 
   ## 5.Liderlik Tablosu ve Çalışma Serisi (Streak)
   - **API Endpoint:** `GET /api/leaderboard, GET /api/me`
-- **Görev:**Kullanıcının motivasyonunu artırmak için ardışık çalışma günlerini ve diğer kullanıcılar arasındaki sıralamasını görüntüleme.
+- **Görev:** Kullanıcının motivasyonunu artırmak için ardışık çalışma günlerini ve diğer kullanıcılar arasındaki sıralamasını görüntüleme.
 - **İşlevler:**
   - Kullanıcı Deneyimi (UX): Listenin en üstünde veya altında "Aşağı çekerek yenile" (Pull-to-refresh) mekanizması. Kendi hesabının farklı bir renk/vurgu ile tabloda kolayca seçilebilmesi.
   - Sıralama Listesi: Kullanıcı adı, toplam süre ve streak sayısını gösteren kaydırılabilir liste.
@@ -59,7 +59,7 @@
 
   ## 6.Profil Özelleştirme ve Ekran Teması Sistemi
   - **API Endpoint:** `PUT /api/me`
-- **Görev:**Kullanıcının arayüz temasını (Koyu/Açık), görünen adını ve avatar rengini mobil cihazında kişiselleştirmesi.
+- **Görev:** Kullanıcının arayüz temasını (Koyu/Açık), görünen adını ve avatar rengini mobil cihazında kişiselleştirmesi.
 - **İşlevler:**
   - Tema Değiştirici: Koyu/Açık mod için geçiş anahtarı (Switch/Toggle Button)
   - Renk Seçici: Avatar için seçilebilir renk paleti (Grid Layout).
