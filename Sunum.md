@@ -2,15 +2,16 @@
 
 ## CI-CD ve Docker Kanıt Videosu
 
-> **Video Linki:** [CI-CD ve Docker videosu linki buraya eklenecek](https://example.com)
+> **Video Linki:** [CI-CD](https://www.youtube.com/watch?v=hdyut4rAdy8)
+> **Video Linki:** [Docker](https://www.youtube.com/watch?v=RCMDxc19vHg)
 
-## RabbitMQ/Kafka Kanıt Videosu
+## RabbitMQ Kanıt Videosu
 
-> **Video Linki:** [RabbitMQ/Kafka videosu linki buraya eklenecek](https://example.com)
+> **Video Linki:** [RabbitMQ](https://www.youtube.com/watch?v=znZLsLcWxJE)
 
-## Redis/Memcached Kanıt Videosu
+## Redis Kanıt Videosu
 
-> **Video Linki:** [Redis/Memcached videosu linki buraya eklenecek](https://example.com)
+> **Video Linki:** [Redis](https://www.youtube.com/watch?v=YwqSYOy0zYs)
 
 ## Sunum Videosu 
 
