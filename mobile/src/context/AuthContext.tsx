@@ -7,7 +7,14 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { appApi, authApi, setToken, type MeResponse, type User } from '../api/client';
+import {
+  appApi,
+  authApi,
+  hasStoredToken,
+  setToken,
+  type MeResponse,
+  type User,
+} from '../api/client';
 import { useTheme } from '../theme/ThemeContext';
 
 type AuthContextValue = {
@@ -57,7 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        await refreshMe();
+        if (await hasStoredToken()) {
+          await refreshMe();
+        } else {
+          setUser(null);
+          setMe(null);
+        }
       } catch {
         setUser(null);
         setMe(null);

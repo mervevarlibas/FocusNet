@@ -1,5 +1,5 @@
 # Dilan Alma'nın Mobil Frontend Görevleri
-**Mobile Front-end Demo Videosu:** [Link buraya eklenecek](https://example.com)
+**Mobile Front-end Demo Videosu:** [demo](https://youtube.com/shorts/6zbayFBlobQ?feature=share)
 ## 1. Kullanıcı Girişi (Giriş) Ekranı
 - **API Endpoint:** `POST /api/auth/login`
 - **Görev:** Kullanıcı girişi ve kayıt yönetimi için mobil ekran tasarımı ve uygulaması.

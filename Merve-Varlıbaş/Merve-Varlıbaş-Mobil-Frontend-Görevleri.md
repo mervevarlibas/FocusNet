@@ -1,5 +1,5 @@
 # Merve Varlıbaş'ın Mobil Frontend Görevleri
-**Mobile Front-end Demo Videosu:** [Link buraya eklenecek](https://example.com)
+**Mobile Front-end Demo Videosu:** [demo](https://www.youtube.com/shorts/7Nhhj1aEN5o)
 
 ## 1.Günlük Hedef ve Yüzde Tamamlama Ekranı
 - **API Endpoint:** `POST /api/goals, GET /api/me, DELETE /api/goals/{date}`

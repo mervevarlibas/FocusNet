@@ -30,8 +30,14 @@ export type MeResponse = {
   todayProgressPercent: number;
 };
 
+const REQUEST_TIMEOUT_MS = 20000;
+
 async function getToken(): Promise<string | null> {
   return SecureStore.getItemAsync(TOKEN_KEY);
+}
+
+export async function hasStoredToken(): Promise<boolean> {
+  return !!(await getToken());
 }
 
 export async function setToken(token: string | null): Promise<void> {
@@ -55,7 +61,31 @@ export async function api<T>(
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers,
+      signal: controller.signal,
+    });
+  } catch (e) {
+    const aborted =
+      e instanceof Error && (e.name === 'AbortError' || e.message.includes('aborted'));
+    if (aborted) {
+      throw new Error(
+        `Sunucuya ulaşılamadı (${API_BASE_URL}). PC'de "npm run api" çalışsın; mobile/.env içindeki IP ipconfig ile aynı Wi-Fi IPv4 olsun.`
+      );
+    }
+    throw new Error(
+      `Ağ hatası. API: ${API_BASE_URL} — telefon ve PC aynı Wi-Fi'de mi?`
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+
   const data = await res.json().catch(() => ({}));
 
   if (res.status === 401 && auth) {

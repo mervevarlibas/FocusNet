@@ -49,13 +49,14 @@ if (!/^mongodb(\+srv)?:\/\//i.test(MONGODB_URI)) {
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/health', async (req, res) => {
   const mongoOk = mongoose.connection.readyState === 1;
   const redisOk = await redisPing();
   res.status(200).json({
-    ok: mongoOk && redisOk,
+    ok: mongoOk,
     service: 'focusnet',
     mongo: mongoOk,
     redis: redisOk,
@@ -411,24 +412,19 @@ async function startServer() {
     });
     console.log('MongoDB bağlandı');
 
-    await connectRedis();
-    console.log('Redis bağlandı');
-
     app.listen(PORT, '0.0.0.0', () => {
       const publicUrl = process.env.RENDER_EXTERNAL_URL;
       if (publicUrl) console.log('FocusNet:', publicUrl);
       else {
-        console.log(`FocusNet (bu PC): http://localhost:${PORT}`);
-        console.log('Aynı ağ: http://<YEREL-IP>:' + PORT);
-        console.log('Liderlik önbelleği: Redis (60 sn, study/log sonrası temizlenir)');
+        console.log(`FocusNet: http://localhost:${PORT}`);
+        console.log('Mobil .env: http://<Wi-Fi-IPv4>:' + PORT);
       }
+      connectRedis().then((ok) => {
+        if (ok) console.log('Redis bağlandı');
+      });
     });
   } catch (e) {
     console.error('Başlatma hatası:', e.message);
-    if (e.message && /ECONNREFUSED|Redis/i.test(e.message)) {
-      console.error('→ Redis: docker compose up -d redis');
-      console.error('→ Test: npm run check:redis');
-    }
     process.exit(1);
   }
 }
