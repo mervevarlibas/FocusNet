@@ -45,7 +45,7 @@
 - Klavye Yönetimi: Şifreler için gizli giriş (secure text entry), hedef dakika/saat girişlerinde ve telefon numaralarında Sadece Rakam (Number Pad) klavyesinin açılması.
 - Formlarda değişiklik yapılmadıysa "Kaydet" butonunun inaktif (disabled) olarak bekletilmesi.
 
-### Platform Özellikleri (Native Feel)
+### 8.Platform Özellikleri (Native Feel)
 - Pomodoro çalışma periyodu bittiğinde mola fazına geçerken cihazın titreşim donanımını (Haptic Feedback) kullanma.
 - Android: Material Design 3 guidelines (Örn: Native Snackbar, Material Switch).
 - iOS: Human Interface Guidelines (Örn: Native Action Sheet, Toggle).

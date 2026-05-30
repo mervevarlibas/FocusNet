@@ -15,8 +15,8 @@ https://www.tusbuddy.com/
 
 ## Proje Linkleri
 
-- **REST API Adresi:**
-- **Web Frontend Adresi:**
+- **REST API Adresi:** [api.focusnet.com](https://focusnet-api.onrender.com)
+- **Web Frontend Adresi:**[FocusNet](https://focusnet.onrender.com/)
 
   ## Proje Ekibi
 
