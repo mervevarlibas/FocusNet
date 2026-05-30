@@ -5,6 +5,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
+const {
+  connectRedis,
+  getCachedLeaderboardTop,
+  setCachedLeaderboardTop,
+  invalidateLeaderboardCache,
+  redisPing,
+} = require('./lib/redis');
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
@@ -44,8 +51,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ ok: true, service: 'focusnet' });
+app.get('/api/health', async (req, res) => {
+  const mongoOk = mongoose.connection.readyState === 1;
+  const redisOk = await redisPing();
+  res.status(200).json({
+    ok: mongoOk && redisOk,
+    service: 'focusnet',
+    mongo: mongoOk,
+    redis: redisOk,
+  });
 });
 
 function todayStr(d = new Date()) {
@@ -290,6 +304,8 @@ app.post('/api/study/log', authMiddleware, async (req, res) => {
       ? Math.min(100, Math.round((goal.completedMinutes / goal.targetMinutes) * 100))
       : null;
 
+    await invalidateLeaderboardCache();
+
     const fresh = await User.findById(req.userId).select('-passwordHash');
     res.json({
       ok: true,
@@ -324,13 +340,21 @@ app.get('/api/calendar', authMiddleware, async (req, res) => {
 
 app.get('/api/leaderboard', authMiddleware, async (req, res) => {
   try {
-    const top = await User.find({})
-      .sort({ totalMinutesAllTime: -1 })
-      .limit(20)
-      .select('displayName email totalMinutesAllTime streak avatarIndex');
+    let top = await getCachedLeaderboardTop();
+    let cache = 'hit';
+    if (!top) {
+      cache = 'miss';
+      top = await User.find({})
+        .sort({ totalMinutesAllTime: -1 })
+        .limit(20)
+        .select('displayName email totalMinutesAllTime streak avatarIndex')
+        .lean();
+      await setCachedLeaderboardTop(top);
+    }
     const me = await User.findById(req.userId).select('totalMinutesAllTime');
-    const rank = (await User.countDocuments({ totalMinutesAllTime: { $gt: me.totalMinutesAllTime || 0 } })) + 1;
-    res.json({ top, myRank: rank, myMinutes: me.totalMinutesAllTime || 0 });
+    const rank =
+      (await User.countDocuments({ totalMinutesAllTime: { $gt: me.totalMinutesAllTime || 0 } })) + 1;
+    res.json({ top, myRank: rank, myMinutes: me.totalMinutesAllTime || 0, cache });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -379,23 +403,34 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-mongoose
-  .connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 25000,
-    family: 4,
-  })
-  .then(() => {
+async function startServer() {
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 25000,
+      family: 4,
+    });
     console.log('MongoDB bağlandı');
+
+    await connectRedis();
+    console.log('Redis bağlandı');
+
     app.listen(PORT, '0.0.0.0', () => {
       const publicUrl = process.env.RENDER_EXTERNAL_URL;
       if (publicUrl) console.log('FocusNet:', publicUrl);
       else {
         console.log(`FocusNet (bu PC): http://localhost:${PORT}`);
         console.log('Aynı ağ: http://<YEREL-IP>:' + PORT);
+        console.log('Liderlik önbelleği: Redis (60 sn, study/log sonrası temizlenir)');
       }
     });
-  })
-  .catch((e) => {
-    console.error('MongoDB hatası:', e.message);
+  } catch (e) {
+    console.error('Başlatma hatası:', e.message);
+    if (e.message && /ECONNREFUSED|Redis/i.test(e.message)) {
+      console.error('→ Redis: docker compose up -d redis');
+      console.error('→ Test: npm run check:redis');
+    }
     process.exit(1);
-  });
+  }
+}
+
+startServer();

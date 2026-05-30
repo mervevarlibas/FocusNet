@@ -1,5 +1,6 @@
-# Yerel geliştirme: API + MongoDB
+# Yerel geliştirme: API + MongoDB + Redis
 # Başlat: docker compose up -d
+# Sadece Redis: docker compose up -d redis
 
 services:
   mongo:
@@ -15,6 +16,17 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: focusnet-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build: .
     container_name: focusnet-api
@@ -23,9 +35,12 @@ services:
     environment:
       PORT: 3000
       MONGODB_URI: mongodb://mongo:27017/focusnet
+      REDIS_URL: redis://redis:6379
       JWT_SECRET: docker-dev-secret-degistir
     depends_on:
       mongo:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:
