@@ -28,14 +28,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const applySession = useCallback(
+    async (token: string, u: User, syncTheme = true) => {
+      await setToken(token);
+      setUser(u);
+      if (syncTheme && (u.theme === 'light' || u.theme === 'dark')) {
+        setMode(u.theme);
+      }
+    },
+    [setMode]
+  );
+
   const refreshMe = useCallback(async () => {
     try {
       const data = await appApi.me();
       setMe(data);
       setUser(data.user);
-      if (data.user.theme === 'light' || data.user.theme === 'dark') {
-        setMode(data.user.theme);
-      }
     } catch (e) {
       if (e instanceof Error && e.message === 'SESSION_EXPIRED') {
         await setToken(null);
@@ -44,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       throw e;
     }
-  }, [setMode]);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -62,21 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       const { token, user: u } = await authApi.login(email, password);
-      await setToken(token);
-      setUser(u);
+      await applySession(token, u);
       await refreshMe();
     },
-    [refreshMe]
+    [applySession, refreshMe]
   );
 
   const register = useCallback(
     async (email: string, password: string, displayName: string) => {
       const { token, user: u } = await authApi.register(email, password, displayName);
-      await setToken(token);
-      setUser(u);
+      await applySession(token, u);
       await refreshMe();
     },
-    [refreshMe]
+    [applySession, refreshMe]
   );
 
   const logout = useCallback(async () => {

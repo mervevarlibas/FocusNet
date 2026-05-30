@@ -20,18 +20,47 @@ import { typography } from '../theme/typography';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
-  const icons: Record<string, string> = {
-    Ana: '🏠',
-    Odak: '⏱️',
-    Takvim: '📅',
-    Sosyal: '🏆',
-    Profil: '👤',
-  };
+const TAB_META: Record<string, { icon: string; label: string }> = {
+  Ana: { icon: '◆', label: 'ANA SAYFA' },
+  Odak: { icon: '◷', label: 'ODAK' },
+  Takvim: { icon: '▦', label: 'TAKVİM' },
+  Sosyal: { icon: '◎', label: 'SOSYAL' },
+  Profil: { icon: '◇', label: 'PROFİL' },
+};
+
+function TabBarIcon({ routeName, focused }: { routeName: string; focused: boolean }) {
+  const { theme } = useTheme();
+  const meta = TAB_META[routeName] || { icon: '•', label: routeName };
   return (
-    <View style={[styles.iconWrap, focused && styles.iconWrapOn]}>
-      <Text style={{ fontSize: 22 }}>{icons[label] || '•'}</Text>
+    <View style={styles.tabIconWrap}>
+      <Text
+        style={[
+          styles.tabIcon,
+          { color: focused ? theme.primary : theme.muted },
+        ]}
+      >
+        {meta.icon}
+      </Text>
     </View>
+  );
+}
+
+function TabBarLabel({ routeName, focused }: { routeName: string; focused: boolean }) {
+  const { theme } = useTheme();
+  const meta = TAB_META[routeName] || { icon: '', label: routeName };
+  return (
+    <Text
+      style={[
+        styles.tabLabel,
+        {
+          color: focused ? theme.primary : theme.muted,
+          opacity: focused ? 1 : 0.65,
+        },
+      ]}
+      numberOfLines={1}
+    >
+      {meta.label}
+    </Text>
   );
 }
 
@@ -45,22 +74,23 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: theme.tabBar,
           borderTopColor: theme.cardBorder,
-          height: 68,
+          borderTopWidth: 1,
+          height: 72,
           paddingBottom: 10,
           paddingTop: 8,
-          elevation: 12,
+          elevation: 16,
           shadowColor: theme.shadow,
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
+          shadowOpacity: 0.2,
+          shadowRadius: 16,
         },
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.muted,
-        tabBarLabelStyle: { ...typography.caption, fontWeight: '600', marginTop: 2 },
-        tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
+        tabBarIcon: ({ focused }) => <TabBarIcon routeName={route.name} focused={focused} />,
+        tabBarLabel: ({ focused }) => <TabBarLabel routeName={route.name} focused={focused} />,
       })}
     >
-      <Tab.Screen name="Ana" component={DashboardScreen} options={{ title: 'Ana Sayfa' }} />
-      <Tab.Screen name="Odak" component={FocusScreen} options={{ title: 'Odak' }} />
+      <Tab.Screen name="Ana" component={DashboardScreen} />
+      <Tab.Screen name="Odak" component={FocusScreen} />
       <Tab.Screen name="Takvim" component={CalendarScreen} />
       <Tab.Screen name="Sosyal" component={SocialScreen} />
       <Tab.Screen name="Profil" component={ProfileScreen} />
@@ -124,6 +154,13 @@ export function AppNavigator() {
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loadingText: { ...typography.body, marginTop: 14 },
-  iconWrap: { opacity: 0.55 },
-  iconWrapOn: { opacity: 1, transform: [{ scale: 1.08 }] },
+  tabIconWrap: { alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
+  tabIcon: { fontSize: 18, fontWeight: '300' },
+  tabLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 1.4,
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
 });

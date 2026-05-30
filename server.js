@@ -5,13 +5,37 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
-
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
-const MONGODB_URI = process.env.MONGODB_URI;
+
+function normalizeMongoUri(raw) {
+  let uri = String(raw || '').trim();
+  // .env yanlışlıkla "MONGODB_URI=mongodb://..." olarak yapıştırıldıysa düzelt
+  if (uri.startsWith('MONGODB_URI=')) {
+    uri = uri.slice('MONGODB_URI='.length).trim();
+  }
+  if (
+    (uri.startsWith('"') && uri.endsWith('"')) ||
+    (uri.startsWith("'") && uri.endsWith("'"))
+  ) {
+    uri = uri.slice(1, -1).trim();
+  }
+  return uri;
+}
+
+const MONGODB_URI = normalizeMongoUri(process.env.MONGODB_URI);
 
 if (!MONGODB_URI) {
   console.error('MONGODB_URI .env dosyasında tanımlı olmalı.');
+  process.exit(1);
+}
+
+if (!/^mongodb(\+srv)?:\/\//i.test(MONGODB_URI)) {
+  console.error(
+    'MONGODB_URI geçersiz. mongodb:// veya mongodb+srv:// ile başlamalı.\n' +
+      'Örnek satır (tek MONGODB_URI= olmalı):\n' +
+      'MONGODB_URI=mongodb://kullanici:sifre@host:27017/focusnet'
+  );
   process.exit(1);
 }
 
@@ -66,6 +90,18 @@ const User = mongoose.model('User', userSchema);
 const DailyGoal = mongoose.model('DailyGoal', dailyGoalSchema);
 const StudySession = mongoose.model('StudySession', studySessionSchema);
 
+function userToJson(user) {
+  return {
+    id: user._id,
+    email: user.email,
+    displayName: user.displayName,
+    avatarIndex: user.avatarIndex,
+    theme: user.theme,
+    streak: user.streak,
+    totalMinutesAllTime: user.totalMinutesAllTime || 0,
+  };
+}
+
 function authMiddleware(req, res, next) {
   const h = req.headers.authorization;
   const token = h && h.startsWith('Bearer ') ? h.slice(7) : null;
@@ -104,17 +140,7 @@ app.post('/api/auth/register', async (req, res) => {
       displayName: displayName || 'Öğrenci',
     });
     const token = jwt.sign({ sub: user._id.toString() }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        displayName: user.displayName,
-        avatarIndex: user.avatarIndex,
-        theme: user.theme,
-        streak: user.streak,
-      },
-    });
+    res.json({ token, user: userToJson(user) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -129,17 +155,7 @@ app.post('/api/auth/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'E-posta veya şifre hatalı', wrongPassword: true });
     const token = jwt.sign({ sub: user._id.toString() }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        displayName: user.displayName,
-        avatarIndex: user.avatarIndex,
-        theme: user.theme,
-        streak: user.streak,
-      },
-    });
+    res.json({ token, user: userToJson(user) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -364,7 +380,10 @@ app.get('*', (req, res) => {
 });
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 25000,
+    family: 4,
+  })
   .then(() => {
     console.log('MongoDB bağlandı');
     app.listen(PORT, '0.0.0.0', () => {

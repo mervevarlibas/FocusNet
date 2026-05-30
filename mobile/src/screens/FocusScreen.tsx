@@ -90,15 +90,27 @@ function StopwatchPanel({
 
   async function stopAndSave() {
     if (!startRef.current) return;
-    const minutes = Math.max(1, Math.round((Date.now() - startRef.current) / 60000));
+    const totalSec = Math.floor((Date.now() - startRef.current) / 1000);
+    const minutes = Math.floor(totalSec / 60);
+
     setRunning(false);
     startRef.current = null;
     setElapsed(0);
+
+    if (totalSec < 60) {
+      setError(`En az 1 dakika çalışmalısın (şu an ${totalSec} sn). Süre kaydedilmedi.`);
+      return;
+    }
+
     setSaving(true);
+    setError(null);
     try {
       await appApi.logStudy(minutes, 'free');
       await refreshMe();
-      showToast(`${minutes} dk kaydedildi`);
+      const extra = totalSec % 60;
+      showToast(
+        extra > 0 ? `${minutes} dk ${extra} sn kaydedildi (${minutes} dk sayıldı)` : `${minutes} dk kaydedildi`
+      );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Kayıt başarısız');

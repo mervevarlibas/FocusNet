@@ -196,6 +196,12 @@ export function ErrorText({ message }: { message: string | null }) {
   return <Text style={[styles.error, { color: theme.error }]}>{message}</Text>;
 }
 
+/** Auth ekranı (koyu cam kart) için hata rengi */
+export function AuthErrorText({ message }: { message: string | null }) {
+  if (!message) return null;
+  return <Text style={[styles.error, { color: '#f87171' }]}>{message}</Text>;
+}
+
 export function Chip({ label, active, onPress }: { label: string; active?: boolean; onPress?: () => void }) {
   const { theme } = useTheme();
   return (

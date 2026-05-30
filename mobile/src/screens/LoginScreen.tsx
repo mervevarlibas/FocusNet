@@ -1,26 +1,18 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useState, type ComponentProps } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/client';
-import { Button, ErrorText, HeroHeader, Input, Screen } from '../components/ui';
-import { useTheme } from '../theme/ThemeContext';
+import { AuthLayout } from '../components/AuthLayout';
+import { Button, ErrorText } from '../components/ui';
 import { typography } from '../theme/typography';
 
-function AuthShell({
-  children,
-  title,
-  subtitle,
-}: {
-  children: React.ReactNode;
-  title: string;
-  subtitle: string;
-}) {
+function AuthInput(props: ComponentProps<typeof TextInput>) {
   return (
-    <Screen scroll keyboard>
-      <HeroHeader title={title} subtitle={subtitle} />
-      <View style={styles.form}>{children}</View>
-    </Screen>
+    <TextInput
+      placeholderTextColor="rgba(248,250,252,0.45)"
+      {...props}
+      style={[styles.input, props.style]}
+    />
   );
 }
 
@@ -32,7 +24,6 @@ export function LoginScreen({
   onReset: () => void;
 }) {
   const { login } = useAuth();
-  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,33 +46,30 @@ export function LoginScreen({
   }
 
   return (
-    <AuthShell title="FocusNet" subtitle="Hedef koy, odaklan, birlikte çalış">
-      <LinearGradient colors={['transparent', theme.primaryGlow]} style={styles.glowCard}>
-        <Text style={[styles.brandTag, { color: theme.primary }]}>COREX · Ders çalışma</Text>
-      </LinearGradient>
-      <Input
+    <AuthLayout subtitle="Ders çalışma & odaklanma uygulaması">
+      <AuthInput
         placeholder="E-posta"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
-      <Input placeholder="Şifre" secureTextEntry value={password} onChangeText={setPassword} />
+      <AuthInput placeholder="Şifre" secureTextEntry value={password} onChangeText={setPassword} />
       <ErrorText message={error} />
       <Button title="Giriş Yap" icon="→" onPress={handleLogin} loading={loading} />
+
       <Pressable onPress={onRegister} style={styles.linkWrap}>
-        <Text style={[styles.link, { color: theme.primary }]}>Hesabın yok mu? Kayıt ol</Text>
+        <Text style={styles.link}>Hesabın yok mu? Kayıt ol</Text>
       </Pressable>
       <Pressable onPress={onReset}>
-        <Text style={[styles.linkMuted, { color: theme.muted }]}>Şifremi unuttum</Text>
+        <Text style={styles.linkMuted}>Şifremi unuttum</Text>
       </Pressable>
-    </AuthShell>
+    </AuthLayout>
   );
 }
 
 export function RegisterScreen({ onBack }: { onBack: () => void }) {
   const { register } = useAuth();
-  const { theme } = useTheme();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -107,27 +95,26 @@ export function RegisterScreen({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <AuthShell title="Kayıt Ol" subtitle="FocusNet ailesine katıl">
-      <Input placeholder="Görünen adın" value={displayName} onChangeText={setDisplayName} />
-      <Input
+    <AuthLayout title="Hesap Oluştur" subtitle="FocusNet'e katıl">
+      <AuthInput placeholder="Görünen adın" value={displayName} onChangeText={setDisplayName} />
+      <AuthInput
         placeholder="E-posta"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
-      <Input placeholder="Şifre (min. 6)" secureTextEntry value={password} onChangeText={setPassword} />
+      <AuthInput placeholder="Şifre (min. 6)" secureTextEntry value={password} onChangeText={setPassword} />
       <ErrorText message={error} />
-      <Button title="Hesap Oluştur" onPress={handleRegister} loading={loading} disabled={!canSubmit} />
+      <Button title="Kayıt Ol" onPress={handleRegister} loading={loading} disabled={!canSubmit} />
       <Pressable onPress={onBack}>
-        <Text style={[styles.link, { color: theme.primary }]}>← Girişe dön</Text>
+        <Text style={styles.link}>← Girişe dön</Text>
       </Pressable>
-    </AuthShell>
+    </AuthLayout>
   );
 }
 
 export function ResetPasswordScreen({ onBack }: { onBack: () => void }) {
-  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -149,37 +136,38 @@ export function ResetPasswordScreen({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <AuthShell title="Şifre Sıfırla" subtitle="Kayıtlı e-postan ile yeni şifre belirle">
-      <Input
+    <AuthLayout title="Şifre Sıfırla">
+      <AuthInput
         placeholder="E-posta"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
-      <Input placeholder="Yeni şifre" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
+      <AuthInput placeholder="Yeni şifre" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
       <ErrorText message={error} />
-      {success ? (
-        <Text style={[styles.success, { color: theme.success }]}>✓ {success}</Text>
-      ) : null}
+      {success ? <Text style={styles.success}>✓ {success}</Text> : null}
       <Button title="Şifreyi Güncelle" onPress={handleReset} loading={loading} />
       <Pressable onPress={onBack}>
-        <Text style={[styles.link, { color: theme.primary }]}>← Girişe dön</Text>
+        <Text style={styles.link}>← Girişe dön</Text>
       </Pressable>
-    </AuthShell>
+    </AuthLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  form: { paddingTop: 8 },
-  glowCard: {
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 20,
+  input: {
+    backgroundColor: 'rgba(15,23,42,0.65)',
+    borderRadius: 14,
+    padding: 16,
+    color: '#f8fafc',
+    fontSize: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(34,211,238,0.2)',
   },
-  brandTag: { ...typography.caption, fontWeight: '700' },
-  linkWrap: { marginTop: 20, alignItems: 'center' },
-  link: { ...typography.bodyBold, textAlign: 'center', marginTop: 12 },
-  linkMuted: { ...typography.caption, textAlign: 'center', marginTop: 10 },
-  success: { ...typography.body, marginBottom: 12 },
+  linkWrap: { marginTop: 18, alignItems: 'center' },
+  link: { ...typography.bodyBold, color: '#22d3ee', textAlign: 'center', marginTop: 12 },
+  linkMuted: { ...typography.caption, color: 'rgba(248,250,252,0.55)', textAlign: 'center', marginTop: 10 },
+  success: { ...typography.body, color: '#22c55e', marginBottom: 12 },
 });

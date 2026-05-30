@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { appApi } from '../api/client';
-import { AVATAR_GRADIENTS } from '../constants/avatars';
+import { AVATAR_CHARACTERS } from '../constants/avatars';
 import { Avatar } from '../components/Avatar';
 import { Button, Card, ErrorText, HeroHeader, Input, Label, Screen, SectionTitle } from '../components/ui';
 import { useToast } from '../context/ToastContext';
@@ -25,14 +24,12 @@ export function ProfileScreen() {
     if (user) {
       setDisplayName(user.displayName || '');
       setAvatarIndex(user.avatarIndex ?? 0);
-      if (user.theme && user.theme !== mode) setMode(user.theme);
     }
-  }, [user?.displayName, user?.avatarIndex, user?.theme]);
+  }, [user?.displayName, user?.avatarIndex]);
 
   const dirty =
     displayName.trim() !== (user?.displayName || '').trim() ||
-    avatarIndex !== (user?.avatarIndex ?? 0) ||
-    mode !== (user?.theme || 'dark');
+    avatarIndex !== (user?.avatarIndex ?? 0);
 
   async function saveProfile() {
     if (!displayName.trim()) {
@@ -56,9 +53,15 @@ export function ProfileScreen() {
     }
   }
 
-  function onThemeToggle(value: boolean) {
+  async function onThemeToggle(value: boolean) {
     const next: ThemeMode = value ? 'light' : 'dark';
     setMode(next);
+    try {
+      await appApi.updateMe({ theme: next });
+      await refreshMe();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Tema kaydedilemedi');
+    }
   }
 
   function confirmLogout() {
@@ -74,13 +77,7 @@ export function ProfileScreen() {
 
       <Card glow>
         <View style={styles.profileHead}>
-          <Avatar
-            index={avatarIndex}
-            name={displayName}
-            email={user?.email || ''}
-            size={72}
-            selected
-          />
+          <Avatar index={avatarIndex} size={72} selected animate />
           <View style={styles.profileMeta}>
             <Text style={[styles.profileName, { color: theme.text }]}>{displayName || 'Öğrenci'}</Text>
             <Text style={[styles.profileEmail, { color: theme.muted }]}>{user?.email}</Text>
@@ -106,20 +103,13 @@ export function ProfileScreen() {
         </View>
       </Card>
 
-      <SectionTitle>Avatar (8 renk)</SectionTitle>
+      <SectionTitle>Karakterin</SectionTitle>
       <Card>
         <View style={styles.avatarGrid}>
-          {AVATAR_GRADIENTS.map((colors, i) => (
-            <Pressable key={i} onPress={() => setAvatarIndex(i)} style={styles.avatarCell}>
-              <LinearGradient
-                colors={colors}
-                style={[
-                  styles.avatarGrad,
-                  avatarIndex === i && { borderWidth: 3, borderColor: theme.primary },
-                ]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              />
+          {AVATAR_CHARACTERS.map((c, i) => (
+            <Pressable key={c.label} onPress={() => setAvatarIndex(i)} style={styles.avatarCell}>
+              <Avatar index={i} size={64} selected={avatarIndex === i} animate={avatarIndex === i} />
+              <Text style={[styles.avatarLabel, { color: theme.muted }]}>{c.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -142,7 +132,7 @@ const styles = StyleSheet.create({
   profileStat: { ...typography.bodyBold, marginTop: 6 },
   themeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   themeLabel: { ...typography.bodyBold },
-  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 16 },
-  avatarCell: { width: '21%' },
-  avatarGrad: { aspectRatio: 1, borderRadius: 14 },
+  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 16, justifyContent: 'center' },
+  avatarCell: { width: '22%', alignItems: 'center' },
+  avatarLabel: { ...typography.caption, marginTop: 4, fontSize: 10 },
 });
