@@ -184,7 +184,12 @@ export function SocialScreen() {
               );
             }}
             ListEmptyComponent={
-              <Text style={[styles.empty, { color: theme.dim }]}>Henüz sıralama yok</Text>
+              <View style={styles.emptyBox}>
+                <Text style={[styles.empty, { color: theme.muted }]}>
+                  Liderlikte sadece arkadaşların görünür.{'\n'}
+                  Arkadaşlar sekmesinden e-posta ile arkadaş ekle.
+                </Text>
+              </View>
             }
           />
         ) : (

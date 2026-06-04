@@ -136,15 +136,20 @@ export function Button({
 }) {
   const { theme } = useTheme();
   const isPrimary = variant === 'primary';
+  const inactive = disabled || loading;
 
-  if (isPrimary && !disabled && !loading) {
+  if (isPrimary) {
     return (
-      <Pressable onPress={onPress} disabled={disabled || loading} style={({ pressed }) => pressed && { opacity: 0.9 }}>
+      <Pressable
+        onPress={onPress}
+        disabled={inactive}
+        style={({ pressed }) => [pressed && !inactive && { opacity: 0.9 }]}
+      >
         <LinearGradient
-          colors={[theme.primary, '#06b6d4']}
+          colors={inactive ? ['#475569', '#334155'] : [theme.primary, '#06b6d4']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={[styles.button, styles.buttonGrad]}
+          style={[styles.button, styles.buttonGrad, inactive && styles.buttonDisabled]}
         >
           {loading ? (
             <ActivityIndicator color={theme.primaryText} />

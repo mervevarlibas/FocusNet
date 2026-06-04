@@ -5,13 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
-const {
-  connectRedis,
-  getCachedLeaderboardTop,
-  setCachedLeaderboardTop,
-  invalidateLeaderboardCache,
-  redisPing,
-} = require('./lib/redis');
+const { connectRedis, redisPing } = require('./lib/redis');
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
@@ -105,6 +99,10 @@ const User = mongoose.model('User', userSchema);
 const DailyGoal = mongoose.model('DailyGoal', dailyGoalSchema);
 const StudySession = mongoose.model('StudySession', studySessionSchema);
 
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
 function userToJson(user) {
   return {
     id: user._id,
@@ -143,16 +141,18 @@ async function applyStudyToUser(user, studyDay, addedMinutes) {
 
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, displayName } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const password = String(req.body.password || '');
+    const displayName = String(req.body.displayName || '').trim() || 'Öğrenci';
     if (!email || !password) return res.status(400).json({ error: 'E-posta ve şifre gerekli' });
     if (password.length < 6) return res.status(400).json({ error: 'Şifre en az 6 karakter' });
-    const exists = await User.findOne({ email: email.toLowerCase() });
+    const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ error: 'Bu e-posta kayıtlı' });
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({
-      email: email.toLowerCase(),
+      email,
       passwordHash,
-      displayName: displayName || 'Öğrenci',
+      displayName,
     });
     const token = jwt.sign({ sub: user._id.toString() }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, user: userToJson(user) });
@@ -163,10 +163,13 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const password = String(req.body.password || '');
     if (!email || !password) return res.status(400).json({ error: 'E-posta ve şifre gerekli' });
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) return res.status(401).json({ error: 'E-posta veya şifre hatalı' });
+    const user = await User.findOne({ email });
+    if (!user || !user.passwordHash) {
+      return res.status(401).json({ error: 'E-posta veya şifre hatalı' });
+    }
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'E-posta veya şifre hatalı', wrongPassword: true });
     const token = jwt.sign({ sub: user._id.toString() }, JWT_SECRET, { expiresIn: '30d' });
@@ -178,10 +181,11 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const newPassword = String(req.body.newPassword || '');
     if (!email || !newPassword) return res.status(400).json({ error: 'E-posta ve yeni şifre gerekli' });
     if (newPassword.length < 6) return res.status(400).json({ error: 'Yeni şifre en az 6 karakter' });
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: 'Bu e-posta ile kayıt yok' });
     user.passwordHash = await bcrypt.hash(newPassword, 10);
     await user.save();
@@ -305,8 +309,6 @@ app.post('/api/study/log', authMiddleware, async (req, res) => {
       ? Math.min(100, Math.round((goal.completedMinutes / goal.targetMinutes) * 100))
       : null;
 
-    await invalidateLeaderboardCache();
-
     const fresh = await User.findById(req.userId).select('-passwordHash');
     res.json({
       ok: true,
@@ -341,21 +343,38 @@ app.get('/api/calendar', authMiddleware, async (req, res) => {
 
 app.get('/api/leaderboard', authMiddleware, async (req, res) => {
   try {
-    let top = await getCachedLeaderboardTop();
-    let cache = 'hit';
-    if (!top) {
-      cache = 'miss';
-      top = await User.find({})
-        .sort({ totalMinutesAllTime: -1 })
-        .limit(20)
-        .select('displayName email totalMinutesAllTime streak avatarIndex')
-        .lean();
-      await setCachedLeaderboardTop(top);
-    }
-    const me = await User.findById(req.userId).select('totalMinutesAllTime');
-    const rank =
-      (await User.countDocuments({ totalMinutesAllTime: { $gt: me.totalMinutesAllTime || 0 } })) + 1;
-    res.json({ top, myRank: rank, myMinutes: me.totalMinutesAllTime || 0, cache });
+    const me = await User.findById(req.userId)
+      .populate('friends', 'displayName email totalMinutesAllTime streak avatarIndex')
+      .select('displayName email totalMinutesAllTime streak avatarIndex friends');
+    if (!me) return res.status(404).json({ error: 'Kullanıcı yok' });
+
+    const friendRows = (me.friends || []).map((f) => ({
+      _id: f._id,
+      displayName: f.displayName,
+      email: f.email,
+      totalMinutesAllTime: f.totalMinutesAllTime || 0,
+      streak: f.streak || 0,
+      avatarIndex: f.avatarIndex ?? 0,
+    }));
+
+    const selfRow = {
+      _id: me._id,
+      displayName: me.displayName,
+      email: me.email,
+      totalMinutesAllTime: me.totalMinutesAllTime || 0,
+      streak: me.streak || 0,
+      avatarIndex: me.avatarIndex ?? 0,
+    };
+
+    const myId = me._id.toString();
+    const hasSelf = friendRows.some((f) => f._id.toString() === myId);
+    const combined = hasSelf ? [...friendRows] : [...friendRows, selfRow];
+    combined.sort((a, b) => (b.totalMinutesAllTime || 0) - (a.totalMinutesAllTime || 0));
+
+    const myMinutes = me.totalMinutesAllTime || 0;
+    const myRank = combined.findIndex((r) => r._id.toString() === myId) + 1;
+
+    res.json({ top: combined, myRank: myRank || 1, myMinutes });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -374,7 +393,7 @@ app.post('/api/friends', authMiddleware, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'E-posta gerekli' });
-    const friend = await User.findOne({ email: email.toLowerCase() });
+    const friend = await User.findOne({ email: normalizeEmail(email) });
     if (!friend) return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
     if (friend._id.equals(req.userId)) return res.status(400).json({ error: 'Kendinizi ekleyemezsiniz' });
     const user = await User.findById(req.userId);

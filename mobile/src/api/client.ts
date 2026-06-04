@@ -30,7 +30,8 @@ export type MeResponse = {
   todayProgressPercent: number;
 };
 
-const REQUEST_TIMEOUT_MS = 20000;
+/** Render ücretsiz plan uyku modu: ilk istek 30–60 sn sürebilir */
+const REQUEST_TIMEOUT_MS = 60000;
 
 async function getToken(): Promise<string | null> {
   return SecureStore.getItemAsync(TOKEN_KEY);
@@ -76,7 +77,7 @@ export async function api<T>(
       e instanceof Error && (e.name === 'AbortError' || e.message.includes('aborted'));
     if (aborted) {
       throw new Error(
-        `Sunucuya ulaşılamadı (${API_BASE_URL}). PC'de "npm run api" çalışsın; mobile/.env içindeki IP ipconfig ile aynı Wi-Fi IPv4 olsun.`
+        `Sunucuya ulaşılamadı (${API_BASE_URL}). İnternet var mı? Render uyuyorsa 1 dk bekleyip tekrar dene. Yerel test: mobile/.env → PC IP.`
       );
     }
     throw new Error(

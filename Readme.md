@@ -15,8 +15,8 @@ https://www.tusbuddy.com/
 
 ## Proje Linkleri
 
-- **REST API Adresi:** [api.focusnet.com](https://focusnet-api.onrender.com)
-- **Web Frontend Adresi:**[FocusNet](https://focusnet.onrender.com/)
+- **REST API / Web (Render):** [https://focusnet.onrender.com](https://focusnet.onrender.com)
+- **Kurulum:** [RENDER-KURULUM.md](RENDER-KURULUM.md)
 
   ## Proje Ekibi
 

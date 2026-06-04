@@ -10,4 +10,4 @@ cp .env.example .env
 npx expo start
 ```
 
-`EXPO_PUBLIC_API_URL` — çalışan API adresi (ör. `http://192.168.x.x:3000` veya canlı URL).
+`EXPO_PUBLIC_API_URL` — varsayılan `https://focusnet.onrender.com` (her yerde). Yerel test: `http://192.168.x.x:3000`. Bkz. [RENDER-KURULUM.md](../RENDER-KURULUM.md).

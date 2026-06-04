@@ -1,16 +1,19 @@
 # Render Blueprint — https://render.com/docs/blueprint-spec
+# Dashboard URL örneği: https://focusnet.onrender.com
 services:
   - type: web
     name: focusnet
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "22"
-      # Render panelinden ekleyin (Asla repoya yazmayın):
-      # MONGODB_URI — MongoDB Atlas bağlantı dizesi
-      # JWT_SECRET — openssl rand -hex 32 benzeri uzun rastgele metin
+      - key: REDIS_DISABLED
+        value: "1"
+      # Render → Environment (repoya şifre yazmayın):
+      # MONGODB_URI = Atlas bağlantı dizesi (/focusnet)
+      # JWT_SECRET = uzun rastgele anahtar

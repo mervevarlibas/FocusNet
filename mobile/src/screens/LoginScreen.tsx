@@ -31,13 +31,15 @@ export function LoginScreen({
 
   async function handleLogin() {
     setError(null);
-    if (!email.trim() || !password) {
+    const e = email.trim().toLowerCase();
+    const p = password;
+    if (!e || !p) {
       setError('E-posta ve şifre gerekli');
       return;
     }
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      await login(e, p);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Giriş başarısız');
     } finally {
@@ -57,9 +59,10 @@ export function LoginScreen({
       <AuthInput placeholder="Şifre" secureTextEntry value={password} onChangeText={setPassword} />
       <ErrorText message={error} />
       <Button title="Giriş Yap" icon="→" onPress={handleLogin} loading={loading} />
+      <Button title="Kayıt Ol" variant="ghost" onPress={onRegister} />
 
       <Pressable onPress={onRegister} style={styles.linkWrap}>
-        <Text style={styles.link}>Hesabın yok mu? Kayıt ol</Text>
+        <Text style={styles.link}>Hesabın yok mu? Buradan kayıt ol</Text>
       </Pressable>
       <Pressable onPress={onReset}>
         <Text style={styles.linkMuted}>Şifremi unuttum</Text>
@@ -76,17 +79,20 @@ export function RegisterScreen({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = email.trim().length > 0 && password.length >= 6;
-
   async function handleRegister() {
-    if (!canSubmit) {
-      setError('Geçerli e-posta ve en az 6 karakter şifre gerekli');
+    const e = email.trim().toLowerCase();
+    if (!e.includes('@')) {
+      setError('Geçerli bir e-posta gir');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Şifre en az 6 karakter olmalı');
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      await register(email.trim(), password, displayName.trim() || 'Öğrenci');
+      await register(e, password, displayName.trim() || 'Öğrenci');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Kayıt başarısız');
     } finally {
@@ -106,7 +112,7 @@ export function RegisterScreen({ onBack }: { onBack: () => void }) {
       />
       <AuthInput placeholder="Şifre (min. 6)" secureTextEntry value={password} onChangeText={setPassword} />
       <ErrorText message={error} />
-      <Button title="Kayıt Ol" onPress={handleRegister} loading={loading} disabled={!canSubmit} />
+      <Button title="Kayıt Ol" icon="✓" onPress={handleRegister} loading={loading} />
       <Pressable onPress={onBack}>
         <Text style={styles.link}>← Girişe dön</Text>
       </Pressable>
@@ -126,7 +132,7 @@ export function ResetPasswordScreen({ onBack }: { onBack: () => void }) {
     setSuccess(null);
     setLoading(true);
     try {
-      const r = await authApi.resetPassword(email.trim(), newPassword);
+      const r = await authApi.resetPassword(email.trim().toLowerCase(), newPassword);
       setSuccess(r.message);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'İşlem başarısız');
