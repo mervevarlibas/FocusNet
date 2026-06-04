@@ -11,7 +11,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
 function normalizeMongoUri(raw) {
   let uri = String(raw || '').trim();
-  // .env yanlışlıkla "MONGODB_URI=mongodb://..." olarak yapıştırıldıysa düzelt
   if (uri.startsWith('MONGODB_URI=')) {
     uri = uri.slice('MONGODB_URI='.length).trim();
   }
@@ -20,6 +19,23 @@ function normalizeMongoUri(raw) {
     (uri.startsWith("'") && uri.endsWith("'"))
   ) {
     uri = uri.slice(1, -1).trim();
+  }
+  return ensureFocusnetDatabase(uri);
+}
+
+/** Render URI'de /focusnet yoksa kayitlar "test" DB'ye gider — duzelt */
+function ensureFocusnetDatabase(uri) {
+  if (/\/focusnet(\?|&|$)/.test(uri)) return uri;
+  if (/\.mongodb\.net\/\?/.test(uri)) {
+    console.warn('MONGODB_URI: veritabani adi yoktu → /focusnet eklendi (test DB hatasi onlendi)');
+    return uri.replace('.mongodb.net/?', '.mongodb.net/focusnet?');
+  }
+  if (/\.mongodb\.net\?/.test(uri)) {
+    console.warn('MONGODB_URI: veritabani adi yoktu → /focusnet eklendi');
+    return uri.replace('.mongodb.net?', '.mongodb.net/focusnet?');
+  }
+  if (/\.mongodb\.net\/?$/.test(uri)) {
+    return uri.replace(/\/?$/, '/focusnet');
   }
   return uri;
 }
@@ -46,17 +62,6 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/health', async (req, res) => {
-  const mongoOk = mongoose.connection.readyState === 1;
-  const redisOk = await redisPing();
-  res.status(200).json({
-    ok: mongoOk,
-    service: 'focusnet',
-    mongo: mongoOk,
-    redis: redisOk,
-  });
-});
-
 function todayStr(d = new Date()) {
   return d.toISOString().slice(0, 10);
 }
@@ -77,6 +82,9 @@ const userSchema = new mongoose.Schema({
   streak: { type: Number, default: 0 },
   lastStudyDay: { type: String, default: '' },
   totalMinutesAllTime: { type: Number, default: 0 },
+  xp: { type: Number, default: 0 },
+  energy: { type: Number, default: 100, min: 0, max: 100 },
+  pomodoroCombo: { type: Number, default: 0, min: 0 },
 });
 
 const dailyGoalSchema = new mongoose.Schema({
@@ -91,7 +99,12 @@ const studySessionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   date: { type: String, required: true },
   durationMinutes: { type: Number, required: true, min: 0 },
-  mode: { type: String, enum: ['free', 'pomodoro_work', 'pomodoro_break'], default: 'free' },
+  mode: {
+    type: String,
+    enum: ['free', 'pomodoro_work', 'pomodoro_break', 'pomodoro_give_up'],
+    default: 'free',
+  },
+  focusCategory: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -99,8 +112,72 @@ const User = mongoose.model('User', userSchema);
 const DailyGoal = mongoose.model('DailyGoal', dailyGoalSchema);
 const StudySession = mongoose.model('StudySession', studySessionSchema);
 
+app.get('/api/health', async (req, res) => {
+  const mongoOk = mongoose.connection.readyState === 1;
+  const redisOk = await redisPing();
+  let database = null;
+  let usersCount = null;
+  if (mongoOk && mongoose.connection.db) {
+    database = mongoose.connection.db.databaseName;
+    try {
+      usersCount = await User.countDocuments();
+    } catch {
+      /* */
+    }
+  }
+  res.status(200).json({
+    ok: mongoOk,
+    service: 'focusnet',
+    mongo: mongoOk,
+    redis: redisOk,
+    database,
+    usersCount,
+    collection: 'users',
+  });
+});
+
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
+}
+
+const POMODORO_BASE_XP = 50;
+const COMBO_BONUS_PER_STACK = 0.15;
+
+const FOCUS_CATEGORIES = new Set([
+  'math',
+  'coding',
+  'reading',
+  'language',
+  'science',
+  'exam',
+  'other',
+]);
+
+function normalizeFocusCategory(raw) {
+  const c = String(raw || 'other').trim().toLowerCase();
+  return FOCUS_CATEGORIES.has(c) ? c : 'other';
+}
+
+function awardPomodoroComplete(user) {
+  user.pomodoroCombo = (user.pomodoroCombo || 0) + 1;
+  const multiplier = 1 + Math.max(0, user.pomodoroCombo - 1) * COMBO_BONUS_PER_STACK;
+  const xpGain = Math.round(POMODORO_BASE_XP * multiplier);
+  user.xp = (user.xp || 0) + xpGain;
+  user.energy = Math.min(100, (user.energy ?? 100) + 5);
+  return {
+    xpGain,
+    combo: user.pomodoroCombo,
+    multiplier: Math.round(multiplier * 100) / 100,
+    energy: user.energy,
+  };
+}
+
+function applyGiveUpPenalty(user, elapsedSeconds, plannedSeconds = 25 * 60) {
+  user.pomodoroCombo = 0;
+  const progress = Math.min(1, Math.max(0, elapsedSeconds / plannedSeconds));
+  const energyLoss = Math.round(12 + progress * 28);
+  user.energy = Math.max(0, (user.energy ?? 100) - energyLoss);
+  return { energyLoss, energy: user.energy, combo: 0 };
 }
 
 function userToJson(user) {
@@ -112,6 +189,9 @@ function userToJson(user) {
     theme: user.theme,
     streak: user.streak,
     totalMinutesAllTime: user.totalMinutesAllTime || 0,
+    xp: user.xp || 0,
+    energy: user.energy ?? 100,
+    pomodoroCombo: user.pomodoroCombo || 0,
   };
 }
 
@@ -154,9 +234,11 @@ app.post('/api/auth/register', async (req, res) => {
       passwordHash,
       displayName,
     });
+    console.log(`[Kayıt] ${email} → db: ${mongoose.connection.db?.databaseName}, koleksiyon: users`);
     const token = jwt.sign({ sub: user._id.toString() }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, user: userToJson(user) });
   } catch (e) {
+    console.error('[Kayıt hata]', e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -205,7 +287,7 @@ app.get('/api/me', authMiddleware, async (req, res) => {
       ? Math.min(100, Math.round((goal.completedMinutes / goal.targetMinutes) * 100))
       : 0;
     res.json({
-      user,
+      user: userToJson(user),
       todayGoal: goal,
       todayProgressPercent: pct,
     });
@@ -223,7 +305,8 @@ app.put('/api/me', authMiddleware, async (req, res) => {
     if (avatarIndex != null && avatarIndex >= 0 && avatarIndex <= 7) user.avatarIndex = avatarIndex;
     if (theme === 'dark' || theme === 'light') user.theme = theme;
     await user.save();
-    res.json({ user: await User.findById(req.userId).select('-passwordHash') });
+    const updated = await User.findById(req.userId).select('-passwordHash');
+    res.json({ user: userToJson(updated) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -281,20 +364,59 @@ app.delete('/api/goals/:date', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/pomodoro/give-up', authMiddleware, async (req, res) => {
+  try {
+    const focusCategory = normalizeFocusCategory(req.body.focusCategory);
+    const elapsedSeconds = Math.max(0, Math.round(Number(req.body.elapsedSeconds) || 0));
+    const plannedSeconds = Math.max(60, Math.round(Number(req.body.plannedSeconds) || 25 * 60));
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: 'Kullanıcı yok' });
+
+    const penalty = applyGiveUpPenalty(user, elapsedSeconds, plannedSeconds);
+    await user.save();
+
+    await StudySession.create({
+      userId: req.userId,
+      date: todayStr(),
+      durationMinutes: 0,
+      mode: 'pomodoro_give_up',
+      focusCategory,
+    });
+
+    res.json({
+      ok: true,
+      penalty,
+      user: userToJson(user),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post('/api/study/log', authMiddleware, async (req, res) => {
   try {
-    const { durationMinutes, mode = 'free', date } = req.body;
+    const { durationMinutes, mode = 'free', date, focusCategory: rawCategory } = req.body;
     const dm = Math.max(0, Math.round(Number(durationMinutes) || 0));
     if (dm < 1) return res.status(400).json({ error: 'En az 1 dakika kaydedilmeli' });
     const d = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : todayStr();
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: 'Kullanıcı yok' });
 
+    const sessionMode = ['free', 'pomodoro_work', 'pomodoro_break'].includes(mode) ? mode : 'free';
+    const focusCategory =
+      sessionMode === 'pomodoro_work' ? normalizeFocusCategory(rawCategory) : '';
+
+    let pomodoroReward = null;
+    if (sessionMode === 'pomodoro_work') {
+      pomodoroReward = awardPomodoroComplete(user);
+    }
+
     await StudySession.create({
       userId: req.userId,
       date: d,
       durationMinutes: dm,
-      mode: ['free', 'pomodoro_work', 'pomodoro_break'].includes(mode) ? mode : 'free',
+      mode: sessionMode,
+      focusCategory,
     });
 
     await applyStudyToUser(user, d, dm);
@@ -315,7 +437,8 @@ app.post('/api/study/log', authMiddleware, async (req, res) => {
       streak: fresh.streak,
       todayGoal: goal,
       todayProgressPercent: pct,
-      user: fresh,
+      user: userToJson(fresh),
+      pomodoroReward,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -429,7 +552,8 @@ async function startServer() {
       serverSelectionTimeoutMS: 25000,
       family: 4,
     });
-    console.log('MongoDB bağlandı');
+    const dbName = mongoose.connection.db?.databaseName || '(bilinmiyor)';
+    console.log(`MongoDB bağlandı — veritabanı: "${dbName}", koleksiyon: users`);
 
     app.listen(PORT, '0.0.0.0', () => {
       const publicUrl = process.env.RENDER_EXTERNAL_URL;

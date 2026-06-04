@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { appApi } from '../api/client';
 import { AVATAR_CHARACTERS } from '../constants/avatars';
 import { Avatar } from '../components/Avatar';
+import { AvatarStatsBar } from '../components/AvatarStatsBar';
 import { Button, Card, ErrorText, HeroHeader, Input, Label, Screen, SectionTitle } from '../components/ui';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -86,6 +87,11 @@ export function ProfileScreen() {
             </Text>
           </View>
         </View>
+        <AvatarStatsBar
+          energy={user?.energy ?? 100}
+          xp={user?.xp ?? 0}
+          combo={user?.pomodoroCombo ?? 0}
+        />
       </Card>
 
       <SectionTitle>Tema</SectionTitle>

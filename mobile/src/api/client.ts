@@ -12,6 +12,22 @@ export type User = {
   theme: 'dark' | 'light';
   streak: number;
   totalMinutesAllTime?: number;
+  xp?: number;
+  energy?: number;
+  pomodoroCombo?: number;
+};
+
+export type PomodoroReward = {
+  xpGain: number;
+  combo: number;
+  multiplier: number;
+  energy: number;
+};
+
+export type PomodoroPenalty = {
+  energyLoss: number;
+  energy: number;
+  combo: number;
 };
 
 export function userId(u: { id?: string; _id?: string }): string {
@@ -129,10 +145,23 @@ export const appApi = {
   setGoal: (hours: number, minutes: number) =>
     api<DailyGoal>('/api/goals', { method: 'POST', body: JSON.stringify({ hours, minutes }) }),
   deleteGoal: (date: string) => api<{ ok: boolean }>(`/api/goals/${date}`, { method: 'DELETE' }),
-  logStudy: (durationMinutes: number, mode = 'free') =>
-    api<MeResponse & { ok: boolean }>('/api/study/log', {
+  logStudy: (
+    durationMinutes: number,
+    mode = 'free',
+    focusCategory?: string
+  ) =>
+    api<MeResponse & { ok: boolean; pomodoroReward?: PomodoroReward | null }>('/api/study/log', {
       method: 'POST',
-      body: JSON.stringify({ durationMinutes, mode }),
+      body: JSON.stringify({ durationMinutes, mode, focusCategory }),
+    }),
+  pomodoroGiveUp: (body: {
+    focusCategory: string;
+    elapsedSeconds: number;
+    plannedSeconds?: number;
+  }) =>
+    api<{ ok: boolean; penalty: PomodoroPenalty; user: User }>('/api/pomodoro/give-up', {
+      method: 'POST',
+      body: JSON.stringify(body),
     }),
   leaderboard: () =>
     api<{

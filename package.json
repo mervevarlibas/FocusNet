@@ -12,6 +12,9 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f api",
     "check:mongo": "node scripts/check-mongo.js",
+    "list:users": "node scripts/list-users.js",
+    "count:dbs": "node scripts/count-all-dbs.js",
+    "merge:users": "node scripts/merge-test-users.js",
     "check:redis": "node scripts/check-redis.js"
   },
   "engines": {

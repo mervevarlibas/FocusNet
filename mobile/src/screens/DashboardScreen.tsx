@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { appApi } from '../api/client';
+import { AvatarStatsBar } from '../components/AvatarStatsBar';
 import { ProgressRing } from '../components/ProgressRing';
 import { DashboardSkeleton } from '../components/Skeleton';
 import {
@@ -92,6 +93,12 @@ export function DashboardScreen() {
       ) : (
         <>
           <Card glow>
+            <AvatarStatsBar
+              energy={me?.user?.energy ?? 100}
+              xp={me?.user?.xp ?? 0}
+              combo={me?.user?.pomodoroCombo ?? 0}
+              compact
+            />
             <View style={styles.streakRow}>
               <LinearGradient colors={['#f59e0b', '#ea580c']} style={styles.streakBadge}>
                 <Text style={styles.streakEmoji}>⚡</Text>

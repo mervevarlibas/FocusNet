@@ -25,14 +25,16 @@ Okulda veya evde **sadece internet** yeterli; PC’de `npm run api` şart değil
 
 | Key | Değer |
 |-----|--------|
-| `MONGODB_URI` | Atlas’taki tam bağlantı (`.../focusnet`) |
+| `MONGODB_URI` | Atlas bağlantı — **mutlaka** `/focusnet` olsun (ör. `...mongodb.net/focusnet?retryWrites=true&w=majority`). **YANLIŞ:** `...mongodb.net/?appName=...` (kayıtlar `test` DB’ye gider) |
 | `JWT_SECRET` | Uzun rastgele metin (her yerde aynı kalsın) |
 | `REDIS_DISABLED` | `1` (ücretsiz planda Redis zorunlu değil) |
 
 5. **Deploy** → bitince üstteki URL’yi kopyala (ör. `https://focusnet.onrender.com`)
 
 6. Tarayıcıda test: `https://SENIN-URL.onrender.com/api/health`  
-   → `{"ok":true,"mongo":true,...}`
+   → `{"ok":true,"mongo":true,"database":"focusnet","usersCount":3,...}`
+
+**Atlas'ta kullanıcı göremiyorsan:** Mobil `focusnet.onrender.com` kullanıyorsa Atlas'ta **Render'ın bağlandığı** cluster + **`focusnet` veritabanı** + **`users` koleksiyonu**na bak (`test` değil). Health'teki `usersCount` artıyorsa kayıt çalışıyordur.
 
 **Atlas:** Network Access → `0.0.0.0/0` (Render sunucusu bağlanabilsin).
 
