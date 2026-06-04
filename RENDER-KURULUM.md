@@ -59,6 +59,21 @@ npx expo start -c
 
 Telefon: **Expo Go** → QR. **Okul Wi‑Fi yeterli** — ev IP’si gerekmez.
 
+### QR timeout / `exp://192.168.x.x:8081` hatasi (hotspot, mobil veri)
+
+Telefon ve PC **farkli ag** sayilir veya Expo yanlis IP gosterir (`192.168.1.110` ev Wi‑Fi IP’si olabilir).
+
+**Cozum — tunnel modu (onerilen disarida):**
+
+```powershell
+cd C:\Users\Yoga\Desktop\FocusNet
+npm run mobile:tunnel
+```
+
+QR `exp://...tunnel...` veya `https://...` gibi gorunur; **internet** yeterli (aynı Wi‑Fi sart degil).
+
+API yine Render’dadir (`mobile/.env` → `https://focusnet.onrender.com`); sadece uygulama kodunu yuklemek icin tunnel gerekir.
+
 `.env` değiştirdikten sonra mutlaka `expo start -c` (cache temiz).
 
 ---

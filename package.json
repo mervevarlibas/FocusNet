@@ -7,6 +7,7 @@
     "start": "node server.js",
     "api": "powershell -ExecutionPolicy Bypass -File ./scripts/start-api.ps1",
     "mobile": "powershell -ExecutionPolicy Bypass -File ./scripts/start-mobile.ps1",
+    "mobile:tunnel": "powershell -ExecutionPolicy Bypass -File ./scripts/start-mobile-tunnel.ps1",
     "dev": "node server.js",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
